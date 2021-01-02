@@ -1,3 +1,5 @@
+from typing import Optional
+
 import yaml
 from discord import Webhook, RequestsWebhookAdapter, Embed, Color, File
 from config import ANNOUNCEMENT_WEBHOOK_URL, BRAINFEED_WEBHOOK_URL, SERVER_ICON_URL
