@@ -1,3 +1,4 @@
+---
 embeds:
   -
     title: "Ping Roles"
@@ -5,5 +6,6 @@ embeds:
     fields:
       -
         name: BrainFeed
-        value: <:BigBrainTime:775231656712732684>
-
+        value: <:big_brain_time:783238289464360980>
+        inline: True
+...
