@@ -1,0 +1,9 @@
+embeds:
+  -
+    title: "Ping Roles"
+    description: "Get these roles so that you're pinged when things of your interests happen!"
+    fields:
+      -
+        name: BrainFeed
+        value: <:BigBrainTime:775231656712732684>
+
