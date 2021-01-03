@@ -1,6 +1,7 @@
 ---
-embeds:
-  -
+type: bot
+
+embed:
     title: "Ping Roles"
     description: "Get these roles so that you're pinged when things of your interests happen!"
     fields:
