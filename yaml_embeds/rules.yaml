@@ -11,6 +11,33 @@ messages:
           value:
             If you are found asking people to help you in Direct Messages, you will be banned.
             We have help channels to suport you, don't trouble people in DMs.
+        - name: No controversial talks 
+          value: 
+            No controversial talks including religious, political or racial slurs. If that's the case, you will be muted.
+        - name: Keep the chat clean
+          value:
+            Don't spam the help channels begging for help. Have some patience, someone will help you soon.
+            This also means no full caps, no copypastas or tYpInG LiKE tHIs.
+        - name: Discussions
+          value:
+            Be nice and supportive to others.
+            If you see someone breaking rules, then report them to the staff, **don't MINIMOD**.
+        - name: Channels
+          value:
+            Keep content in their respective channels. 
+            Every channel features pinned messages which will guide you on your way.
+        - name: Partnerships
+          value: 
+            If you would like to partner, then DM an admin to proceed.
+        - name: Suggestions
+          value:
+            Yes, we are always looing for them.
+            Use the destined command for passing out suggestions so that can be voted on.
+
+      footer:
+        - text: Be sure to follow these rules properly.
+
+      color: 14834431
 
 username: TechStruck
 avatar_url: https://www.pngitem.com/pimgs/m/55-553040_rules-regulations-fluxrewards-get-rules-icon-hd-png.png
