@@ -32,7 +32,7 @@ messages:
         - name: Suggestions
           value:
             Yes, we are always looing for them.
-            Use the destined command for passing out suggestions so that can be voted on.
+            Use the destined command for passing out suggestions so that they can be voted on.
 
       footer:
         - text: Be sure to follow these rules properly.
