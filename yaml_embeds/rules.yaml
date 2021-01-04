@@ -4,11 +4,13 @@ messages:
   - embeds:
     - title: Server Rules
 
-      description: |
+      description:
         In order to maintain peace in the server, we want you all to follow some rules.
-    - title: No DM Help
-      description: |
-        If you are found asking people to help you in Direct Messages, you will be banned. We have help channels to suport you, don't trouble people in DMs.
+      fields:
+        - name: No DM Help
+          value:
+            If you are found asking people to help you in Direct Messages, you will be banned.
+            We have help channels to suport you, don't trouble people in DMs.
 
 username: TechStruck
 avatar_url: https://www.pngitem.com/pimgs/m/55-553040_rules-regulations-fluxrewards-get-rules-icon-hd-png.png
