@@ -2,11 +2,10 @@
 type: bot
 
 embed:
-    title: "Ping Roles"
-    description: "Get these roles so that you're pinged when things of your interests happen!"
-    fields:
-      -
-        name: BrainFeed
-        value: <:big_brain_time:783238289464360980>
-        inline: True
+  title: "Ping Roles"
+  description: "Get these roles so that you're pinged when things of your interests happen!"
+  fields:
+    - name: BrainFeed
+      value: <:big_brain_time:783238289464360980>
+      inline: True
 ...
