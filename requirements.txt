@@ -14,5 +14,5 @@ py==1.10.0
 PyYAML==5.3.1
 requests==2.25.1
 sympy==1.7.1
-tortoise-orm==0.16.19
+tortoise-orm==0.16.19; python_version > '3.6'
 watchgod==0.6
