@@ -3,6 +3,7 @@ from praw import Reddit
 from utils.webhook import make_webhook
 from discord import Embed, Color
 from config import config
+import random
 
 reddit = Reddit(
     client_id=config['REDDIT_ID'],
