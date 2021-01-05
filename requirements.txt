@@ -1,4 +1,4 @@
-aerich==0.4.3
+aerich==0.4.3; python_version > '3.6'
 aiofiles==0.6.0
 aioredis==1.3.1
 akinator.py==4.0.1
