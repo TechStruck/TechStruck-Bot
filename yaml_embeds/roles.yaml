@@ -7,5 +7,6 @@ embed:
   fields:
     - name: BrainFeed
       value: <:big_brain_time:783238289464360980>
-      inline: True
+    - name: AutoMeme
+      value: <:KEKW:782901406444158986>
 ...

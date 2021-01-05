@@ -1,8 +1,8 @@
 type: webhook
 
 messages:
-  text: @everyone
-  - embeds:
+  - text: "@everyone"
+    embeds:
     - title: We got memez
 
       description:

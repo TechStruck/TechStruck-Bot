@@ -7,6 +7,6 @@ os.environ.setdefault('JISHAKU_RETAIN', '1')
 os.environ.setdefault('JISHAKU_NO_UNDERSCORE', '1')
 
 if __name__ == '__main__':
-    import config
+    from config import config
     bot = TechStruckBot()
-    bot.run(config.BOT_TOKEN)
+    bot.run(config["BOT_TOKEN"])
