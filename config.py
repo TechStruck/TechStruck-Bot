@@ -8,3 +8,13 @@ except FileNotFoundError:
     config = {}
 
 config.update(os.environ)
+
+tortoise_config = {
+    "connections": {"default": config['DATABASE_URL']},
+    "apps": {
+        "main": {
+            "models": ["bot.models", "aerich.models"],
+            "default_connection": "default"
+        }
+    }
+}
