@@ -2,11 +2,20 @@
 type: bot
 
 embed:
-  title: "Ping Roles"
+  title: "Roles"
   description: "Get these roles so that you're pinged when things of your interests happen!"
   fields:
-    - name: BrainFeed
-      value: <:big_brain_time:783238289464360980>
-    - name: AutoMeme
-      value: <:KEKW:782901406444158986>
+    - name: Ping roles
+      value: |
+        <:big_brain_time:783238289464360980> BrainFeed
+        :trophy: Event Ping
+        :skull_crossbones: Chat Revival
+    - name: About roles
+      value: |
+        <a:8740_developer_transparent:784434576424173589> Developer 
+        :art: Designer
+        :video_game: Gamer
+    - name: Access roles
+      value:
+        <:KEKW:782901406444158986> AutoMeme
 ...
