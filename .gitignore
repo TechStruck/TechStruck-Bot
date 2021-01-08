@@ -1,4 +1,8 @@
 config.yaml
 .vim
 
+# Tortoise stuff
+aerich.ini
+migrations
+
 .vercel

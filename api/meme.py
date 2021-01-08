@@ -25,7 +25,8 @@ webhook = make_webhook(config['MEME_CHANNEL_WEBHOOK_URL'])
 
 ALLOWED_FORMATS = ('.jpg', '.gif', '.png', '.jpeg')
 SUBREDDITS = ('memes', 'meme', 'dankmeme', 'me_irl',
-              'dankmemes', 'blursedimages', 'showerthoughts')
+              'dankmemes', 'blursedimages', 'showerthoughts',
+              'jokes', 'funny')
 
 
 def send_memes(webhook: Webhook, subreddits: List[str], quantity: int):
