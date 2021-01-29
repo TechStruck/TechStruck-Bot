@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/main.py": { "maxDuration": 60 }
+    "api/main.py": { "maxDuration": 10 }
   },
   "routes": [{ "src": "/(.*)", "dest": "/api/main" }]
 }
