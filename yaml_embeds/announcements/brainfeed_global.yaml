@@ -1,0 +1,26 @@
+type: webhook
+
+messages:
+  - text: <@&795155105854259200>
+    embeds:
+    - title: BrainFeed full scale
+
+      description:
+        Improvements to BrainFeed
+      fields:
+        - name: Now what?
+          value:
+            You can now write BrainFeeds!
+            Authoring BrainFeeds will give you the exclusive <@&804358537903865866> role!
+
+        - name: Expansion
+          value: |
+            BrainFeed is now being planned on being sent to other servers as well!
+        - name: Other
+          value:
+            Feel free to contact <@!721720908502401026> regarding anything
+            or leave a suggestion using `?suggest <suggestion>` in <#789838528271745045> 
+      color: 14834431
+
+username: TechStruck Announcement
+avatar_url: https://cdn.discordapp.com/icons/782517843820412948/1f46e3a2041c5bdc80b9418b19393503.png?size

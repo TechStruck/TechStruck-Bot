@@ -1,0 +1,22 @@
+type: webhook
+
+messages:
+  - text: <@&795155105854259200> <@&804405540205363201> @everyone
+    embeds:
+    - title: Git Tips
+
+      description:
+        Introducing git tips at <#804393356301041704>!
+      fields:
+        - name: About
+          value:
+            Become a pro in source control by learning from these tips!
+            Discover the true power of git!
+        - name: Other
+          value:
+            Checkout <#794767676492218378> to get the <@&804403893760688179> role and <@&804405540205363201> role
+            **(Last everyone ping)**
+      color: 14834431
+
+username: TechStruck Announcement
+avatar_url: https://cdn.discordapp.com/icons/782517843820412948/1f46e3a2041c5bdc80b9418b19393503.png?size
