@@ -1,9 +1,9 @@
-from config import config
+from config import common
 tortoise_config = {
-    "connections": {"default": config['DATABASE_URL']},
+    "connections": {"default": common.config.database_uri},
     "apps": {
         "main": {
-            "models": ["bot.models", "aerich.models"],
+            "models": ["models", "aerich.models"],
             "default_connection": "default"
         }
     }

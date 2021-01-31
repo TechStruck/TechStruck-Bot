@@ -3,7 +3,7 @@ from typing import List
 from discord import Message, Member, Intents
 from discord.ext import commands, tasks
 from tortoise import Tortoise
-from .models import MemberModel
+from models import UserModel
 
 
 class TechStruckBot(commands.Bot):
@@ -13,7 +13,8 @@ class TechStruckBot(commands.Bot):
         self.connect_db.start()
 
         if load_extensions:
-            self.load_extensions(('bot.cogs.admin', 'bot.cogs.me', 'bot.cogs.thank'))
+            self.load_extensions(
+                ('bot.cogs.admin', 'bot.cogs.me', 'bot.cogs.thank'))
         if loadjsk:
             self.load_extension('jishaku')
 

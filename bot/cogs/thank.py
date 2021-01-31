@@ -1,7 +1,7 @@
 from typing import Optional
 from discord.ext import commands
 from discord import Member, Embed, Color
-from bot.models import ThankModel, MemberModel
+from models import ThankModel, UserModel
 
 
 class Thank(commands.Cog):
@@ -14,19 +14,21 @@ class Thank(commands.Cog):
             return await ctx.send(embed=Embed(title="Bruh", description="You can't thank yourselves", color=Color.red()))
         if recv.bot:
             return await ctx.send(embed=Embed(title="Bruh", description="You can't thank a bot", color=Color.red()))
-        thanked, _ = await MemberModel.get_or_create(id=recv.id)
-        thanker, _ = await MemberModel.get_or_create(id=ctx.author.id)
-        await ThankModel.create(thanker=thanker, thanked=thanked, description=description)
+        # TODO: Convert this to an expression (?) for efficiency
+        thanked, _ = await UserModel.get_or_create(id=recv.id)
+        thanker, _ = await UserModel.get_or_create(id=ctx.author.id)
+        await ThankModel.create(thanker=thanker, thanked=thanked, description=description, guild_id=ctx.guild.id)
         await ctx.send(f"You have thanked {recv}")
 
     @commands.command(name="thankstats")
     async def thank_stats(self, ctx: commands.Context, *, member: Optional[Member] = None):
         member = member or ctx.author
-        mem_obj = await MemberModel.get(id=member.id).prefetch_related('thanks', 'sent_thanks')
+        sent_thanks = await ThankModel.filter(thanker__id=member.id).count()
+        recv_thanks = await ThankModel.filter(thanked__id=member.id).count()
 
         embed = Embed(title=f"Thank stats for: {member}", color=Color.green())
-        embed.add_field(name="Thanks received", value=len(mem_obj.thanks))
-        embed.add_field(name="Thanks sent", value=len(mem_obj.sent_thanks))
+        embed.add_field(name="Thanks received", value=recv_thanks)
+        embed.add_field(name="Thanks sent", value=sent_thanks)
         await ctx.send(embed=embed)
 
 
