@@ -8,8 +8,9 @@ from apraw import Reddit
 from discord import AsyncWebhookAdapter, Color, Embed, Webhook
 from fastapi import APIRouter, Depends
 
-from config.webhook import webhook_config
 from config.reddit import reddit_config
+from config.webhook import webhook_config
+
 from ..dependencies import aiohttp_session, auth_dep
 
 router = APIRouter(prefix="/webhooks", dependencies=[Depends(auth_dep)])
