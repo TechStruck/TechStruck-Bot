@@ -1,3 +1,4 @@
+import ssl
 from datetime import datetime
 
 from aiohttp import ClientSession
@@ -33,8 +34,11 @@ def state_check(state: str = Query(...)) -> int:
 
     return payload['id']
 
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
-db_pool = create_pool(config.database_uri)
+db_pool = create_pool(config.database_uri, ssl=ctx)
 
 
 def db_connection():
