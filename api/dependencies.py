@@ -1,8 +1,8 @@
 import ssl
 from datetime import datetime
 
+import asyncpg
 from aiohttp import ClientSession
-from asyncpg import create_pool
 from fastapi import Header, HTTPException, Query, status
 from jose import jwt
 
@@ -34,12 +34,15 @@ def state_check(state: str = Query(...)) -> int:
 
     return payload['id']
 
+
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
-db_pool = create_pool(config.database_uri, ssl=ctx)
 
-
-def db_connection():
-    return db_pool
+async def db_connection():
+    connection = await asyncpg.connect(config.database_uri, ssl=ctx)
+    try:
+        yield connection
+    finally:
+        await connection.close()
