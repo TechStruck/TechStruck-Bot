@@ -34,9 +34,9 @@ async def stackexchange_oauth(
 ):
     """Link account with stackexchange through OAuth2"""
 
-    async with session.post("https://stackoverflow.com/oauth/access_token", data={**stack_oauth_config.dict(), "code": code}) as res:
-        auth = parse_qs(await res.text())
-    await db_conn.execute(stack_sql_query, user_id, auth['access_token'][0])
+    async with session.post("https://stackoverflow.com/oauth/access_token/json", data={**stack_oauth_config.dict(), "code": code}) as res:
+        auth = await res.json()
+    await db_conn.execute(stack_sql_query, user_id, auth['access_token'])
 
     return "Done bruh"
 

@@ -7,10 +7,11 @@ from fastapi import Header, HTTPException, Query, status
 from jose import jwt
 
 from config.common import config
+from config.webhook import webhook_config
 
 
 def auth_dep(authorization: str = Header(...)):
-    if authorization != config.authorization:
+    if authorization != webhook_config.authorization:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED)
 
 

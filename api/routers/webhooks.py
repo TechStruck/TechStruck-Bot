@@ -47,7 +47,7 @@ async def send_memes(webhook: Webhook, subreddits: List[str], quantity: int):
 
 @router.get("/meme")
 async def send_memes_route(session: ClientSession = Depends(aiohttp_session)):
-    sent, skipped = await send_memes(Webhook.from_url(config.meme_webhook_url, adapter=AsyncWebhookAdapter(session)), SUBREDDITS, 5)
+    sent, skipped = await send_memes(Webhook.from_url(webhook_config.meme, adapter=AsyncWebhookAdapter(session)), SUBREDDITS, 5)
     return {'sent': sent, 'skipped': skipped}
 
 
@@ -62,7 +62,7 @@ async def git_tip(session: ClientSession = Depends(aiohttp_session)):
 
     tip = tips[tip_no]
 
-    await Webhook.from_url(config.git_tips_webhook_url, adapter=AsyncWebhookAdapter(session)).send(
+    await Webhook.from_url(webhook_config.git_tips, adapter=AsyncWebhookAdapter(session)).send(
         "<@&804403893760688179>",
         embed=Embed(
             title=tip['title'],
