@@ -36,6 +36,9 @@ async def stackexchange_oauth(
 
     async with session.post("https://stackoverflow.com/oauth/access_token/json", data={**stack_oauth_config.dict(), "code": code}) as res:
         auth = await res.json()
+    print(auth)
+    if 'access_token' not in auth:
+        return {k:v for k,v in auth.items() if k.startswith("error_")}
     await db_conn.execute(stack_sql_query, user_id, auth['access_token'])
 
     return "Done bruh"
