@@ -31,7 +31,7 @@ class TechStruckBot(commands.Bot):
                 traceback.print_exception(type(e), e, e.__traceback__)
 
     async def on_message(self, msg: Message):
-        if msg.author.bot or not msg.guild or msg.guild.id not in (782517843820412948,):
+        if msg.author.bot:
             return
         await self.process_commands(msg)
 
