@@ -21,6 +21,10 @@ class Github(commands.Cog):
         self.bot = bot
         self.files_regex = re.compile(r"\s{0,}```\w{0,}\s{0,}")
 
+    @property
+    def session(self):
+        return bot.http._HTTPClient__session
+
     async def cog_check(self, ctx: commands.Context):
         user = await UserModel.get_or_none(id=ctx.author.id)
         if ctx.command != self.link_github and (user is None or user.github_oauth_token is None):
@@ -45,8 +49,7 @@ class Github(commands.Cog):
         # Dict comprehension to create the files 'object'
         files = {name:{"content": content+"\n"} for name, content in zip(files_and_names[0::2], files_and_names[1::2])}
 
-        # No need to create a new session
-        req = await self.bot.http._HTTPClient__session.post("https://api.github.com/gists", headers={"Authorization":f"Bearer {ctx.user_obj.github_oauth_token}"}, json={"files":files})
+        req = await self.session.post("https://api.github.com/gists", headers={"Authorization":f"Bearer {ctx.user_obj.github_oauth_token}"}, json={"files":files})
 
         res = await req.json()
         # TODO: Make this more verbose to the user and log errors

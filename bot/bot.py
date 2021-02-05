@@ -36,6 +36,8 @@ class TechStruckBot(commands.Bot):
         await self.process_commands(msg)
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.CommandNotFound):
+            return
         title = error.__class__.__name__
         await ctx.send(embed=Embed(title=title, description=str(error), color=Color.red()))
 
