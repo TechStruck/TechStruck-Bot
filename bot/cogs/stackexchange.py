@@ -9,6 +9,7 @@ from models import UserModel
 from config.oauth import stack_oauth_config
 from config.common import config
 
+
 class StackExchangeNotLinkedError(commands.CommandError):
     def __str__(self):
         return "Your stackexchange account hasn't been linked yet, please use the `linkstack` command to do it"
@@ -18,12 +19,13 @@ class Stackexchange(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.base_url = "https://api.stackexchange.com/2.2"
+        self.search_result_template = "[Link]({})\nViews: {}\nTags: {}"
 
     @property
     def session(self):
         return self.bot.http._HTTPClient__session
 
-    async def cog_check(self, ctx:commands.Context):
+    async def cog_check(self, ctx: commands.Context):
         user = await UserModel.get_or_none(id=ctx.author.id)
         if ctx.command != self.link_stackoverflow and (user is None or user.stackoverflow_oauth_token is None):
             raise StackExchangeNotLinkedError()
@@ -37,33 +39,37 @@ class Stackexchange(commands.Cog):
         # TODO: Use a stackexchange filter here
         # https://api.stackexchange.com/docs/filters
         res = await self.session.get(
-                self.base_url + "/me",
-                data={**stack_oauth_config.dict(),
-                      "access_token": ctx.user_obj.stackoverflow_oauth_token,
-                      "site": "stackoverflow"}
+            self.base_url + "/me",
+            data={**stack_oauth_config.dict(),
+                  "access_token": ctx.user_obj.stackoverflow_oauth_token,
+                  "site": "stackoverflow"}
         )
         data = await res.json()
         await ctx.send(data['items'][0]['reputation'])
 
     @commands.command(name="stacksearch", aliases=["stackser"])
-    async def stackoverflow_search(self, ctx:commands.Context, *, term:str):
+    async def stackoverflow_search(self, ctx: commands.Context, *, term: str):
         """Search stackoverflow for your error/issue"""
         res = await self.session.get(
-                self.base_url + "/search/advanced",
-                data={**stack_oauth_config.dict(),
-                    "access_token": ctx.user_obj.stackoverflow_oauth_token,
-                    "site": "stackoverflow",
-                    "q":term,
-                    "answers": 1,
-                    "pagesize": 5}
+            self.base_url + "/search/advanced",
+            data={**stack_oauth_config.dict(),
+                  "access_token": ctx.user_obj.stackoverflow_oauth_token,
+                  "site": "stackoverflow",
+                  "q": term,
+                  "pagesize": 5}
         )
         data = await res.json()
         print(data)
         embed = Embed(title="Stackoverflow search", color=Color.green())
-        embed.add_field(name="Results", value="\n\n".join([
-            f"{i} {q['title']}\t[link]({q['link']})"
-            for i,q in enumerate(data['items'],1)
-        ]), inline=False)
+        for i, q in enumerate(data['items'], 1):
+            tags = "\t".join(["`"+t+"`" for t in q["tags"]])
+            embed.add_field(
+                name=str(i) + " " + q['title'],
+                value=self.search_result_template.format(q['link'] , q['view_count'], tags),
+                inline=False
+            )
+        else:
+            embed.add_field(name="Oops", value="Couldn't find any results")
         await ctx.send(embed=embed)
 
     @commands.command(name="linkstack", aliases=["lnstack"])

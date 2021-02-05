@@ -1,6 +1,9 @@
 from discord.ext import commands
 import discord
 
+bot_links = """[Support/Beta-Testing/Suggestions](https://discord.gg/KgZRMch3b6)
+[Github](https://github.com/FalseDev/Tech-struck)"""
+
 class HelpCommand(commands.HelpCommand):
     """
     An Embed help command
@@ -20,17 +23,18 @@ class HelpCommand(commands.HelpCommand):
         if description:
             embed.description = description
 
-        for cog, commands in mapping.items():
+        for cog, cmds in mapping.items():
             name = 'No Category' if cog is None else cog.qualified_name
-            filtered = await self.filter_commands(commands, sort=True)
+            filtered = await self.filter_commands(cmds, sort=True)
             if filtered:
-                value = '\u2002'.join(c.name for c in commands)
+                value = '\u2002'.join(c.name for c in cmds)
                 if cog and cog.description:
                     value = '{0}\n{1}'.format(cog.description, value)
 
                 embed.add_field(name=name, value=value)
 
         embed.set_footer(text=self.get_ending_note())
+        self.add_support_server(embed)
         await self.get_destination().send(embed=embed)
 
     async def send_cog_help(self, cog):
@@ -43,6 +47,7 @@ class HelpCommand(commands.HelpCommand):
             embed.add_field(name=self.get_command_signature(command), value=command.short_doc or '...', inline=False)
 
         embed.set_footer(text=self.get_ending_note())
+        self.add_support_server(embed)
         await self.get_destination().send(embed=embed)
 
     async def send_group_help(self, group):
@@ -54,9 +59,17 @@ class HelpCommand(commands.HelpCommand):
             filtered = await self.filter_commands(group.commands, sort=True)
             for command in filtered:
                 embed.add_field(name=self.get_command_signature(command), value=command.short_doc or '...', inline=False)
+        
 
         embed.set_footer(text=self.get_ending_note())
+        self.add_support_server(embed)
         await self.get_destination().send(embed=embed)
+
+    def add_support_server(self, embed):
+        return embed.add_field(
+                name="Support server",
+                value=bot_links
+                )
 
     send_command_help = send_group_help
 

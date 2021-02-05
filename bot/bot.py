@@ -1,4 +1,5 @@
 import traceback
+import re
 from typing import List
 from discord import Message, Member, Intents, Color, Embed
 from discord.ext import commands, tasks
@@ -38,7 +39,11 @@ class TechStruckBot(commands.Bot):
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.CommandNotFound):
             return
-        title = error.__class__.__name__
+        if isinstance(error, commands.CommandInvokeError):
+            await super().on_command_error(ctx, error)
+            await ctx.send("Oopsy, something's broken")
+        title = " ".join(re.compile(
+            r"[A-Z][a-z]*").findall(error.__class__.__name__))
         await ctx.send(embed=Embed(title=title, description=str(error), color=Color.red()))
 
     async def on_ready(self):
