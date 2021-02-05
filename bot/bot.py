@@ -1,6 +1,6 @@
 import traceback
 from typing import List
-from discord import Message, Member, Intents
+from discord import Message, Member, Intents, Color, Embed
 from discord.ext import commands, tasks
 from tortoise import Tortoise
 from models import UserModel
@@ -34,6 +34,10 @@ class TechStruckBot(commands.Bot):
         if msg.author.bot:
             return
         await self.process_commands(msg)
+
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        title = error.__class__.__name__
+        await ctx.send(embed=Embed(title=title, description=str(error), color=Color.red()))
 
     async def on_ready(self):
         print("Ready!")
