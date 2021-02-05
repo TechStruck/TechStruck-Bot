@@ -59,7 +59,6 @@ class Stackexchange(commands.Cog):
                   "pagesize": 5}
         )
         data = await res.json()
-        print(data)
         embed = Embed(title="Stackoverflow search", color=Color.green())
         for i, q in enumerate(data['items'], 1):
             tags = "\t".join(["`"+t+"`" for t in q["tags"]])

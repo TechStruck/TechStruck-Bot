@@ -2,18 +2,21 @@ from discord.ext import commands
 from discord import Embed, Color, NotFound
 
 
-def setup(bot: commands.Bot):
-    @bot.command(aliases=["latency"])
-    async def ping(ctx: commands.Context):
+class Common(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.command(aliases=["latency"])
+    async def ping(self, ctx: commands.Context):
         """Check latency of the bot"""
-        latency = str(round(bot.latency*1000, 1))
+        latency = str(round(self.bot.latency*1000, 1))
         await ctx.send(embed=Embed(title="Pong!", description=f"{latency}ms", color=Color.blue()))
 
-    @bot.command(aliases=["statistics"])
-    async def stats(ctx: commands.Context):
+    @commands.command(aliases=["statistics"])
+    async def stats(self, ctx: commands.Context):
         """Stats of the bot"""
-        users = len(bot.users)
-        guilds = len(bot.guilds)
+        users = len(self.bot.users)
+        guilds = len(self.bot.guilds)
 
         embed = Embed(color=Color.dark_green())
         embed.add_field(name="Guilds", value=guilds)
@@ -22,8 +25,8 @@ def setup(bot: commands.Bot):
 
         await ctx.send(embed=embed)
 
-    @bot.command(aliases=["re"])
-    async def redo(ctx: commands.Context):
+    @commands.command(aliases=["re"])
+    async def redo(self, ctx: commands.Context):
         """Reply to a message to rerun it if its a command, helps when you've made typos"""
         ref = ctx.message.reference
         if not ref:
@@ -32,4 +35,8 @@ def setup(bot: commands.Bot):
             message = await ctx.channel.fetch_message(ref.message_id)
         except NotFound:
             return await ctx.reply("Couldn't find that message")
-        await bot.process_commands(message)
+        await self.bot.process_commands(message)
+
+
+def setup(bot: commands.Bot):
+    bot.add_cog(Common(bot))
