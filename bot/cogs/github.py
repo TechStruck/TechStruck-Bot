@@ -23,7 +23,7 @@ class Github(commands.Cog):
 
     @property
     def session(self):
-        return bot.http._HTTPClient__session
+        return self.bot.http._HTTPClient__session
 
     async def cog_check(self, ctx: commands.Context):
         user = await UserModel.get_or_none(id=ctx.author.id)
@@ -45,6 +45,20 @@ class Github(commands.Cog):
 
     @commands.command(name="creategist", aliases=["crgist"])
     async def create_gist(self, ctx: commands.Context, *, inp):
+        """
+        Create gists from within discord
+        
+        Example:
+        filename.py
+        ```
+        # Codeblock with contents of filename.py
+        ```
+
+        filename2.txt
+        ```
+        Codeblock containing filename2.txt's contents
+        ```
+        """
         files_and_names = self.files_regex.split(inp)[:-1]
         # Dict comprehension to create the files 'object'
         files = {name:{"content": content+"\n"} for name, content in zip(files_and_names[0::2], files_and_names[1::2])}
