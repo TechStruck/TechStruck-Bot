@@ -35,6 +35,8 @@ class Common(commands.Cog):
             message = await ctx.channel.fetch_message(ref.message_id)
         except NotFound:
             return await ctx.reply("Couldn't find that message")
+        if message.author != ctx.author:
+            return
         await self.bot.process_commands(message)
 
 

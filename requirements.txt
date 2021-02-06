@@ -8,6 +8,7 @@ jishaku==1.20.0.220
 python-dotenv==0.15.0
 python-jose==3.2.0
 PyYAML==5.3.1
+quizapi==0.1.1
 tortoise-orm[asyncpg]==0.16.19; python_version > '3.6'
 async-exit-stack; python_version < '3.7'
 async-generator; python_version < '3.7'

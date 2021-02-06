@@ -60,13 +60,14 @@ class Stackexchange(commands.Cog):
         )
         data = await res.json()
         embed = Embed(title="Stackoverflow search", color=Color.green())
-        for i, q in enumerate(data['items'], 1):
-            tags = "\t".join(["`"+t+"`" for t in q["tags"]])
-            embed.add_field(
-                name=str(i) + " " + q['title'],
-                value=self.search_result_template.format(q['link'] , q['view_count'], tags),
-                inline=False
-            )
+        if data['items']:
+            for i, q in enumerate(data['items'], 1):
+                tags = "\t".join(["`"+t+"`" for t in q["tags"]])
+                embed.add_field(
+                    name=str(i) + " " + q['title'],
+                    value=self.search_result_template.format(q['link'] , q['view_count'], tags),
+                    inline=False
+                )
         else:
             embed.add_field(name="Oops", value="Couldn't find any results")
         await ctx.send(embed=embed)
