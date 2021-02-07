@@ -1,5 +1,6 @@
 from discord.ext import commands
-from discord import Member, Embed, Color
+from discord import Member, Embed, Color, Forbidden
+import asyncio
 
 
 class Fun(commands.Cog):
@@ -9,7 +10,8 @@ class Fun(commands.Cog):
         self.bot = bot
         
     @commands.command()
-    async def beer(self, ctx, user: discord.Member = None, *, reason: commands.clean_content = ""):
+    async def beer(self, ctx, user: Member = None, *, reason: commands.clean_content = ""):
+        """Have virtual beer with your friends/fellow members"""
         if not user or user.id == ctx.author.id:
             return await ctx.send(f"{ctx.author.name}: paaaarty!:tada::beer:")
         if user.id == self.bot.user.id:
@@ -31,7 +33,7 @@ class Fun(commands.Cog):
         except asyncio.TimeoutError:
             await msg.delete()
             await ctx.send(f"well, doesn't seem like {user.name} wanted a beer with you {ctx.author.name} ;-;")
-        except discord.Forbidden:
+        except Forbidden:
             beer_offer = f"{user.name}, you got a :beer: from {ctx.author.name}"
             beer_offer = beer_offer + f"\n\nReason: {reason}" if reason else beer_offer
             await msg.edit(content=beer_offer)
