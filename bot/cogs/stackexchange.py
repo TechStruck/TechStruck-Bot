@@ -1,4 +1,5 @@
 import datetime
+import html
 from urllib.parse import urlencode
 
 from discord.ext import commands
@@ -64,7 +65,7 @@ class Stackexchange(commands.Cog):
             for i, q in enumerate(data['items'], 1):
                 tags = "\t".join(["`"+t+"`" for t in q["tags"]])
                 embed.add_field(
-                    name=str(i) + " " + q['title'],
+                    name=str(i) + " " + html.unescape(q['title']),
                     value=self.search_result_template.format(q['link'] , q['view_count'], tags),
                     inline=False
                 )
