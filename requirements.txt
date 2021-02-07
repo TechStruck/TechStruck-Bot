@@ -4,6 +4,7 @@ asyncpg==0.21.0
 backports-datetime-fromisoformat==1.0.0; python_version < '3.7'
 discord.py==1.6.0
 fastapi==0.63.0
+Jinja2==2.11.3
 jishaku==1.20.0.220
 python-dotenv==0.15.0
 python-jose==3.2.0
