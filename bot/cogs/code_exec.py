@@ -73,9 +73,12 @@ class CodeExec(commands.Cog):
 #            return await ctx.reply("Your output was too long, so here's the pastebin link " + url)
         embed = Embed(
             title=f"Ran your {result['language']} code", color=Color.green())
-        output = output[:500] + (len(output)>500) * "\n\n**Output shortened**"
+        output = output[:500]
+        shortened = (len(output)>500)
         lines = output.splitlines()
-        output = "\n".join(lines[:15]) + (len(output)>15) * "\n\n**Output shortened**"
+        shortened = shortened or (len(lines)>15)
+        output = "\n".join(lines[:15])
+        output += shortened * "\n\n**Output shortened**"
         embed.add_field(name="Output", value=output or "**<No output>**")
 
         await ctx.reply(embed=embed)
