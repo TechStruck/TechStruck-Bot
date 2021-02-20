@@ -15,7 +15,7 @@ class TechStruckBot(commands.Bot):
 
         if load_extensions:
             self.load_extensions(
-                ('bot.core', 'bot.cogs.admin', 'bot.cogs.thank', 'bot.cogs.stackexchange', 'bot.cogs.github', 'bot.cogs.help_command', 'bot.cogs.code_exec'))
+                ('bot.core', 'bot.cogs.admin', 'bot.cogs.thank', 'bot.cogs.stackexchange', 'bot.cogs.github', 'bot.cogs.help_command', 'bot.cogs.code_exec', 'bot.cogs.fun'))
         if loadjsk:
             self.load_extension('jishaku')
 
