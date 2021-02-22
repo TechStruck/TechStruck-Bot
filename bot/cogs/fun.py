@@ -70,7 +70,7 @@ class Fun(commands.Cog):
         await msg.add_reaction("\U0001f37b")
         await asyncio.sleep(20)
         users = await (await ctx.channel.fetch_message(msg.id)).reactions[0].users().flatten()
-        await ctx.send(", ".join([u.display_name for u in users if not u.bot] + [] if ctx.author in users else [ctx.author]) + " enjoy a lovely beer paaarty \U0001f37b")
+        await ctx.send(", ".join([u.display_name for u in users + ([] if ctx.author in users else [ctx.author]) if not u.bot]) + " enjoy a lovely beer paaarty \U0001f37b")
 
 
 def setup(bot: commands.Bot):
