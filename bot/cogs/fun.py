@@ -63,6 +63,15 @@ class Fun(commands.Cog):
                 if set(m.id for m in await r.message.reactions[0].users().flatten()).issuperset(m.id for m in members):
                     return await msg.edit(content=(", ".join(m.display_name for m in members) + ", " + ctx.author.display_name + " enjoy a lovely beer together \U0001f37b"))
 
+    @commands.command()
+    async def beerparty(self, ctx:commands.Context, * , reason: str = None):
+        reason = ('\nReason:' + reason) if reason else ''
+        msg = await ctx.send(f"Open invite to a beer party!{reason}")
+        await msg.add_reaction("\U0001f37b")
+        await asyncio.sleep(20)
+        users = await (await ctx.channel.fetch_message(msg.id)).reactions[0].users().flatten()
+        await ctx.send(", ".join([u.display_name for u in users if not u.bot] + [] if ctx.author in users else [ctx.author]) + " enjoy a lovely beer paaarty \U0001f37b")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Fun(bot))
