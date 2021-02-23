@@ -39,14 +39,16 @@ class Fun(commands.Cog):
             await msg.edit(content=beer_offer)
 
     @commands.command()
-    async def beers(self, ctx:commands.Context, *members: Member):
+    async def beers(self, ctx:commands.Context, members: commands.Greedy[Member], reason:commands.clean_content=None):
         if not members:
             return await ctx.send("You can't have beer with no other person!")
         for member in members:
             if member.bot:
                 return await ctx.send("Beer with bots isn't exactly a thing...")
 
-        message = ", ".join(m.display_name for m in members) + "\nYou have been invited for beer \U0001f37b by " + ctx.author.display_name
+        message = (
+                ", ".join(m.display_name for m in members) + "\nYou have been invited for beer \U0001f37b by " + ctx.author.display_name
+                + (" Reason: " + reason) if reason else "")
 
         msg = await ctx.send(message)
         await msg.add_reaction("\U0001f37b")
@@ -64,7 +66,7 @@ class Fun(commands.Cog):
                     return await msg.edit(content=(", ".join(m.display_name for m in members) + ", " + ctx.author.display_name + " enjoy a lovely beer together \U0001f37b"))
 
     @commands.command()
-    async def beerparty(self, ctx:commands.Context, * , reason: str = None):
+    async def beerparty(self, ctx:commands.Context, * , reason: commands.clean_content = None):
         reason = ('\nReason:' + reason) if reason else ''
         msg = await ctx.send(f"Open invite to a beer party!{reason}")
         await msg.add_reaction("\U0001f37b")
