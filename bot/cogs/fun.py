@@ -47,8 +47,10 @@ class Fun(commands.Cog):
                 return await ctx.send("Beer with bots isn't exactly a thing...")
 
         message = (
-                ", ".join(m.display_name for m in members) + "\nYou have been invited for beer \U0001f37b by " + ctx.author.display_name
-                + (" Reason: " + reason) if reason else "")
+                ", ".join(m.display_name for m in members)
+                + "\nYou have been invited for beer \U0001f37b by " + ctx.author.display_name
+                + ((" Reason: " + reason) if reason else "")
+        )
 
         msg = await ctx.send(message)
         await msg.add_reaction("\U0001f37b")
