@@ -39,7 +39,7 @@ class Fun(commands.Cog):
             await msg.edit(content=beer_offer)
 
     @commands.command()
-    async def beers(self, ctx:commands.Context, members: commands.Greedy[Member], reason:commands.clean_content=None):
+    async def beers(self, ctx:commands.Context, members: commands.Greedy[Member], * ,reason:commands.clean_content=None):
         if not members:
             return await ctx.send("You can't have beer with no other person!")
         for member in members:
