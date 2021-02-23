@@ -3,7 +3,7 @@ import datetime
 from urllib.parse import urlencode
 
 from discord.ext import commands
-from discord import Member, Embed
+from discord import Member, Embed, Color
 from jose import jwt
 
 from models import UserModel
@@ -27,7 +27,8 @@ class Github(commands.Cog):
 
     async def cog_check(self, ctx: commands.Context):
         user = await UserModel.get_or_none(id=ctx.author.id)
-        if ctx.command != self.link_github and (user is None or user.github_oauth_token is None):
+        if ctx.command != self.link_github and (
+                user is None or user.github_oauth_token is None):
             raise GithubNotLinkedError()
         ctx.user_obj = user
         return True
@@ -47,7 +48,7 @@ class Github(commands.Cog):
     async def create_gist(self, ctx: commands.Context, *, inp):
         """
         Create gists from within discord
-        
+
         Example:
         filename.py
         ```
@@ -61,13 +62,29 @@ class Github(commands.Cog):
         """
         files_and_names = self.files_regex.split(inp)[:-1]
         # Dict comprehension to create the files 'object'
-        files = {name:{"content": content+"\n"} for name, content in zip(files_and_names[0::2], files_and_names[1::2])}
+        files = {name: {"content": content + "\n"} for name,
+                 content in zip(files_and_names[0::2], files_and_names[1::2])}
 
-        req = await self.session.post("https://api.github.com/gists", headers={"Authorization":f"Bearer {ctx.user_obj.github_oauth_token}"}, json={"files":files})
+        req = await self.session.post("https://api.github.com/gists", headers={"Authorization": f"Bearer {ctx.user_obj.github_oauth_token}"}, json={"files": files})
 
         res = await req.json()
         # TODO: Make this more verbose to the user and log errors
         await ctx.send(res.get("html_url", "Something went wrong."))
+
+    @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
+    async def github_search(self, ctx: commands.Context, *, term: str):
+        req = await self.session.get("https://api.github.com/search/repositories", headers={"Authorization": f"Bearer {ctx.user_obj.github_oauth_token}"}, params=dict(q=term, per_page=5))
+
+        data = await req.json()
+        if not data['items']:
+            return await ctx.send(embed=Embed(title=f"Searched for {term}", color=Color.red(), description="No results found"))
+
+        em = Embed(title=f"Searched for {term}", color=Color.green(), description="\n\n".join([
+            "[{0[owner][login]}/{0[name]}]({0[html_url]})\n{0[stargazers_count]:,} :star:\u2800{0[forks_count]} \u2387\u2800\n{0[description]:<50}".format(result)
+            for result in data['items']
+        ]))
+
+        await ctx.send(embed=em)
 
 
 def setup(bot: commands.Bot):
