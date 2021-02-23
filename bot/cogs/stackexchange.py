@@ -20,7 +20,7 @@ class Stackexchange(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.base_url = "https://api.stackexchange.com/2.2"
-        self.search_result_template = "[Link]({})\nViews: {}\nTags: {}"
+        self.search_result_template = "[View](https://stackoverflow.com/q/{})\u2800\u2800Score: {}\u2800\u2800Tags: {}"
 
     @property
     def session(self):
@@ -52,10 +52,11 @@ class Stackexchange(commands.Cog):
     async def stackoverflow_search(self, ctx: commands.Context, *, term: str):
         """Search stackoverflow for your error/issue"""
         res = await self.session.get(
-            self.base_url + "/search/advanced",
+            self.base_url + "/search/excerpts",
             data={**stack_oauth_config.dict(),
                   "access_token": ctx.user_obj.stackoverflow_oauth_token,
                   "site": "stackoverflow",
+                  "sort": "relevance",
                   "q": term,
                   "pagesize": 5}
         )
@@ -63,10 +64,10 @@ class Stackexchange(commands.Cog):
         embed = Embed(title="Stackoverflow search", color=Color.green())
         if data['items']:
             for i, q in enumerate(data['items'], 1):
-                tags = "\t".join(["`"+t+"`" for t in q["tags"]])
+                tags = "\u2800".join(["`"+t+"`" for t in q["tags"]])
                 embed.add_field(
                     name=str(i) + " " + html.unescape(q['title']),
-                    value=self.search_result_template.format(q['link'] , q['view_count'], tags),
+                    value=self.search_result_template.format(q['question_id'] , q['score'], tags),
                     inline=False
                 )
         else:
