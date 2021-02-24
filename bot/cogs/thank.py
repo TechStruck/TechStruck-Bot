@@ -1,6 +1,8 @@
 from typing import Optional
 from discord.ext import commands
 from discord import Member, Embed, Color
+from tortoise.functions import Count, Q
+
 from models import ThankModel, UserModel
 
 
@@ -40,6 +42,19 @@ class Thank(commands.Cog):
                 name="Thanks sent",
                 value="Global: {}\nThis server: {}".format(sent_thanks, server_sent_thanks)
                 )
+        await ctx.send(embed=embed)
+
+    @commands.command(name="thankleaderboard", aliases=["thanklb", "thankslb"])
+    async def thank_leaderboard(self, ctx:commands.Context):
+        await ctx.trigger_typing()
+        lb = await UserModel.annotate(thank_count=Count("thanks", _filter=Q(thanks__guild_id=ctx.guild.id))).filter(thank_count__gt=0).order_by("-thank_count").limit(5)
+        if not lb:
+            return await ctx.send(embed=Embed(title="Oopsy", description="There are no thanks here yet!", color=Color.red()))
+        invis = "\u2800"
+        embed = Embed(title="LeaderBoard", color=Color.blue(), description="\n\n".join([
+            f"**{m.thank_count} Thanks**{invis * (4 - len(str(m.thank_count)))}<@!{m.id}>"
+            for m in lb
+        ]))
         await ctx.send(embed=embed)
 
 
