@@ -73,6 +73,8 @@ class Github(commands.Cog):
 
     @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
     async def github_search(self, ctx: commands.Context, *, term: str):
+        # TODO: Docs
+
         req = await self.session.get("https://api.github.com/search/repositories", headers={"Authorization": f"Bearer {ctx.user_obj.github_oauth_token}"}, params=dict(q=term, per_page=5))
 
         data = await req.json()
@@ -80,12 +82,17 @@ class Github(commands.Cog):
             return await ctx.send(embed=Embed(title=f"Searched for {term}", color=Color.red(), description="No results found"))
 
         em = Embed(title=f"Searched for {term}", color=Color.green(), description="\n\n".join([
-            "[{0[owner][login]}/{0[name]}]({0[html_url]})\n{0[stargazers_count]:,} :star:\u2800{0[forks_count]} \u2387\u2800\n{0[description]:<50}".format(result)
+            "[{0[owner][login]}/{0[name]}]({0[html_url]})\n{0[stargazers_count]:,} :star:\u2800{0[forks_count]} \u2387\u2800\n{1}".format(result, self.repo_desc_format(result))
             for result in data['items']
         ]))
 
         await ctx.send(embed=em)
 
+    @staticmethod
+    def repo_desc_format(result):
+        description = result['description']
+        if not description: return ''
+        return description if len(description)<100 else (description[:100] + '...')
 
 def setup(bot: commands.Bot):
     bot.add_cog(Github(bot))
