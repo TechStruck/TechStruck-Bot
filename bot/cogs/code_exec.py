@@ -1,9 +1,10 @@
 import re
 
+from discord import Color, Embed
 from discord.ext import commands
-from discord import Embed, Color
 
 from config.bot import bot_config
+
 
 # TODO: Move this into utils
 async def create_guest_paste_bin(session, code):

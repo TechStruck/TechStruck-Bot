@@ -1,6 +1,7 @@
-from discord.ext import commands
-from discord import Member, Embed, Color, Forbidden
 import asyncio
+
+from discord import Color, Embed, Forbidden, Member
+from discord.ext import commands
 
 
 class Fun(commands.Cog):

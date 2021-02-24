@@ -1,5 +1,5 @@
-from discord.ext import commands
 from discord import Color, Embed, Message
+from discord.ext import commands
 from quizapi import create_quiz_api
 
 from config.bot import bot_config

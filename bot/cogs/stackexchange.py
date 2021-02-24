@@ -2,13 +2,13 @@ import datetime
 import html
 from urllib.parse import urlencode
 
+from discord import Color, Embed, Member
 from discord.ext import commands
-from discord import Member, Embed, Color
 from jose import jwt
 
-from models import UserModel
-from config.oauth import stack_oauth_config
 from config.common import config
+from config.oauth import stack_oauth_config
+from models import UserModel
 
 
 class StackExchangeNotLinkedError(commands.CommandError):

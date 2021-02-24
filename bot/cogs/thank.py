@@ -1,6 +1,7 @@
 from typing import Optional
+
+from discord import Color, Embed, Member
 from discord.ext import commands
-from discord import Member, Embed, Color
 from tortoise.functions import Count, Q
 
 from models import ThankModel, UserModel

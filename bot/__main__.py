@@ -1,5 +1,7 @@
 import os
+
 from discord.ext import commands
+
 from .bot import TechStruckBot
 
 os.environ.setdefault('JISHAKU_HIDE', '1')
