@@ -1,5 +1,5 @@
+from discord import Color, Embed, NotFound
 from discord.ext import commands
-from discord import Embed, Color, NotFound
 
 
 class Common(commands.Cog):

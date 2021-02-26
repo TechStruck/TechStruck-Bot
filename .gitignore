@@ -1,5 +1,7 @@
 config.yaml
 .vim
+.env
+**/__pycache__
 
 # Tortoise stuff
 aerich.ini
