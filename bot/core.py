@@ -9,8 +9,10 @@ class Common(commands.Cog):
     @commands.command(aliases=["latency"])
     async def ping(self, ctx: commands.Context):
         """Check latency of the bot"""
-        latency = str(round(self.bot.latency*1000, 1))
-        await ctx.send(embed=Embed(title="Pong!", description=f"{latency}ms", color=Color.blue()))
+        latency = str(round(self.bot.latency * 1000, 1))
+        await ctx.send(
+            embed=Embed(title="Pong!", description=f"{latency}ms", color=Color.blue())
+        )
 
     @commands.command(aliases=["statistics"])
     async def stats(self, ctx: commands.Context):

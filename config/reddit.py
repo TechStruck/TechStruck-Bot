@@ -1,9 +1,11 @@
 from pydantic import BaseSettings
+
+
 class RedditConfig(BaseSettings):
     client_id: str
-    client_secret: str 
-    username: str 
-    password: str 
+    client_secret: str
+    username: str
+    password: str
 
     class Config:
         env_file = ".env"

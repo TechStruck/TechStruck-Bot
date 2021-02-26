@@ -9,9 +9,9 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         fields = {
-            'database_uri': {
-                'env': ["database_uri", "database_url", "database"]},
-            'secret': {'env': 'signing_secret'}}
+            "database_uri": {"env": ["database_uri", "database_url", "database"]},
+            "secret": {"env": "signing_secret"},
+        }
 
 
 config = Settings()

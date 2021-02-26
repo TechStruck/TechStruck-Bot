@@ -7,6 +7,7 @@ from .routers import oauth, webhooks
 
 if sys.version_info[1] < 7:
     from backports.datetime_fromisoformat import MonkeyPatch
+
     MonkeyPatch.patch_fromisoformat()
 
 

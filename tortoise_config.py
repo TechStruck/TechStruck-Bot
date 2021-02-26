@@ -19,14 +19,11 @@ tortoise_config = {
                 "password": database_uri.password,
                 "port": database_uri.port or 5432,
                 "user": database_uri.user,
-                "ssl": ctx
-            }
+                "ssl": ctx,
+            },
         }
     },
     "apps": {
-        "main": {
-            "models": ["models", "aerich.models"],
-            "default_connection": "default"
-        }
-    }
+        "main": {"models": ["models", "aerich.models"], "default_connection": "default"}
+    },
 }

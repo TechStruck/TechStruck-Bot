@@ -13,14 +13,14 @@ async def create_guest_paste_bin(session, code):
         data={
             "api_dev_key": bot_config.pastebin_api_key,
             "api_paste_code": code,
-            "api_paste_private":0,
+            "api_paste_private": 0,
             "api_paste_name": "output.txt",
             "api_paste_expire_date": "1D",
-            "api_option":"paste",
-        })
+            "api_option": "paste",
+        },
+    )
     return await res.text()
 
- 
 
 class CodeExec(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -35,7 +35,8 @@ class CodeExec(commands.Cog):
     async def _run_code(self, *, lang: str, code: str):
         res = await self.session.post(
             "https://emkc.org/api/v1/piston/execute",
-            json={"language": lang, "source": code})
+            json={"language": lang, "source": code},
+        )
         return await res.json()
 
     @commands.command()
@@ -46,38 +47,48 @@ class CodeExec(commands.Cog):
         """
         matches = self.regex.findall(codeblock)
         if not matches:
-            return await ctx.reply(embed=Embed(title="Uh-oh", description="Couldn't quite see your codeblock"))
+            return await ctx.reply(
+                embed=Embed(
+                    title="Uh-oh", description="Couldn't quite see your codeblock"
+                )
+            )
         lang = matches[0][0] or matches[0][1]
         if not lang:
-            return await ctx.reply(embed=Embed(title="Uh-oh", description="Couldn't find the language hinted in the codeblock or before it"))
+            return await ctx.reply(
+                embed=Embed(
+                    title="Uh-oh",
+                    description="Couldn't find the language hinted in the codeblock or before it",
+                )
+            )
         code = matches[0][2]
         result = await self._run_code(lang=lang, code=code)
 
         await self._send_result(ctx, result)
 
     @commands.command()
-    async def runl(self, ctx:commands.Context, lang:str, *, code:str):
+    async def runl(self, ctx: commands.Context, lang: str, *, code: str):
         """
         Run a single line of code, **must** specify language as first argument
         """
         result = await self._run_code(lang=lang, code=code)
         await self._send_result(ctx, result)
 
-
-
-    async def _send_result(self, ctx:commands.Context, result:dict):
+    async def _send_result(self, ctx: commands.Context, result: dict):
         if "message" in result:
-            return await ctx.reply(embed=Embed(title="Uh-oh", description=result["message"], color=Color.red()))
-        output = result['output']
-#        if len(output) > 2000:
-#            url = await create_guest_paste_bin(self.session, output)
-#            return await ctx.reply("Your output was too long, so here's the pastebin link " + url)
-        embed = Embed(
-            title=f"Ran your {result['language']} code", color=Color.green())
+            return await ctx.reply(
+                embed=Embed(
+                    title="Uh-oh", description=result["message"], color=Color.red()
+                )
+            )
+        output = result["output"]
+        #        if len(output) > 2000:
+        #            url = await create_guest_paste_bin(self.session, output)
+        #            return await ctx.reply("Your output was too long, so here's the pastebin link " + url)
+        embed = Embed(title=f"Ran your {result['language']} code", color=Color.green())
         output = output[:500]
-        shortened = (len(output)>500)
+        shortened = len(output) > 500
         lines = output.splitlines()
-        shortened = shortened or (len(lines)>15)
+        shortened = shortened or (len(lines) > 15)
         output = "\n".join(lines[:15])
         output += shortened * "\n\n**Output shortened**"
         embed.add_field(name="Output", value=output or "**<No output>**")

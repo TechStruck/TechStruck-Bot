@@ -1,5 +1,6 @@
 from pydantic import BaseSettings
 
+
 class StackOAuthConfig(BaseSettings):
     client_id: str
     client_secret: str

@@ -21,10 +21,17 @@ reddit = Reddit(
 )
 
 
-REDDIT_ALLOWED_FORMATS = ('.jpg', '.gif', '.png', '.jpeg')
-SUBREDDITS = ('memes', 'meme', 'dankmeme', 'me_irl',
-              'dankmemes', 'showerthoughts',
-              'jokes', 'funny')
+REDDIT_ALLOWED_FORMATS = (".jpg", ".gif", ".png", ".jpeg")
+SUBREDDITS = (
+    "memes",
+    "meme",
+    "dankmeme",
+    "me_irl",
+    "dankmemes",
+    "showerthoughts",
+    "jokes",
+    "funny",
+)
 
 
 async def send_memes(webhook: Webhook, subreddits: List[str], quantity: int):
@@ -38,8 +45,7 @@ async def send_memes(webhook: Webhook, subreddits: List[str], quantity: int):
             continue
         embed = Embed(title=meme.title, color=Color.magenta())
         embed.set_image(url=meme.url)
-        embed.set_footer(
-            text=f'\U0001f44d {meme.ups} \u2502 \U0001f44e {meme.downs}')
+        embed.set_footer(text=f"\U0001f44d {meme.ups} \u2502 \U0001f44e {meme.downs}")
         await webhook.send(embed=embed)
         sent += 1
     return sent, skipped
@@ -47,8 +53,12 @@ async def send_memes(webhook: Webhook, subreddits: List[str], quantity: int):
 
 @router.get("/meme")
 async def send_memes_route(session: ClientSession = Depends(aiohttp_session)):
-    sent, skipped = await send_memes(Webhook.from_url(webhook_config.meme, adapter=AsyncWebhookAdapter(session)), SUBREDDITS, 5)
-    return {'sent': sent, 'skipped': skipped}
+    sent, skipped = await send_memes(
+        Webhook.from_url(webhook_config.meme, adapter=AsyncWebhookAdapter(session)),
+        SUBREDDITS,
+        5,
+    )
+    return {"sent": sent, "skipped": skipped}
 
 
 @router.get("/git-tip")
@@ -62,13 +72,15 @@ async def git_tip(session: ClientSession = Depends(aiohttp_session)):
 
     tip = tips[tip_no]
 
-    await Webhook.from_url(webhook_config.git_tips, adapter=AsyncWebhookAdapter(session)).send(
+    await Webhook.from_url(
+        webhook_config.git_tips, adapter=AsyncWebhookAdapter(session)
+    ).send(
         "<@&804403893760688179>",
         embed=Embed(
-            title=tip['title'],
-            description='```sh\n' + tip['tip'] + '```',
-            color=Color.green()
+            title=tip["title"],
+            description="```sh\n" + tip["tip"] + "```",
+            color=Color.green(),
         ).set_footer(text="Tip {}".format(tip_no)),
-        avatar_url="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Git_icon.svg/2000px-Git_icon.svg.png"
+        avatar_url="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Git_icon.svg/2000px-Git_icon.svg.png",
     )
     return {"status": "success"}
