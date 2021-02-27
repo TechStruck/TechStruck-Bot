@@ -4,8 +4,8 @@ import random
 from typing import List
 
 from aiohttp import ClientSession
-from apraw import Reddit
-from discord import AsyncWebhookAdapter, Color, Embed, Webhook
+from praw import Reddit
+from discord import RequestsWebhookAdapter, Color, Embed, Webhook
 from fastapi import APIRouter, Depends
 
 from config.reddit import reddit_config
@@ -34,27 +34,27 @@ SUBREDDITS = (
 )
 
 
-async def send_memes(webhook: Webhook, subreddits: List[str], quantity: int):
+def send_memes(webhook: Webhook, subreddits: List[str], quantity: int):
     sent = 0
     skipped = 0
     while sent < quantity:
-        meme_subreddit = await reddit.subreddit(random.choice(SUBREDDITS))
-        meme = await meme_subreddit.random()
+        meme_subreddit = reddit.subreddit(random.choice(SUBREDDITS))
+        meme = meme_subreddit.random()
         if not any((meme.url.endswith(i) for i in REDDIT_ALLOWED_FORMATS)):
             skipped += 1
             continue
         embed = Embed(title=meme.title, color=Color.magenta())
         embed.set_image(url=meme.url)
         embed.set_footer(text=f"\U0001f44d {meme.ups} \u2502 \U0001f44e {meme.downs}")
-        await webhook.send(embed=embed)
+        webhook.send(embed=embed)
         sent += 1
     return sent, skipped
 
 
 @router.get("/meme")
-async def send_memes_route(session: ClientSession = Depends(aiohttp_session)):
-    sent, skipped = await send_memes(
-        Webhook.from_url(webhook_config.meme, adapter=AsyncWebhookAdapter(session)),
+def send_memes_route():
+    sent, skipped = send_memes(
+        Webhook.from_url(webhook_config.meme, adapter=RequestsWebhookAdapter()),
         SUBREDDITS,
         5,
     )
