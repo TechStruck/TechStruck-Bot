@@ -54,3 +54,20 @@ class UserModel(Model):
     class Meta:
         table = "users"
         table_description = "Represents all users"
+
+
+class JokeModel(Model):
+    id = fields.IntField(pk=True, description="Joke ID")
+
+    setup = fields.CharField(max_length=50, description="Joke setup")
+    end = fields.CharField(max_length=50, description="Joke end")
+    tags = fields.JSONField(default=[], description="List of tags")
+
+    accepted = fields.BooleanField(default=False, description="Whether the joke has been accepted in")
+
+    creator = fields.ForeignKeyField(model_name="main.UserModel", related_name="joke_submissions", description="User who submitted this Joke")
+
+    class Meta:
+        table = "jokes"
+        table_description = "User submitted jokes being collected"
+
