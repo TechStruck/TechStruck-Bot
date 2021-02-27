@@ -1,5 +1,6 @@
 from discord.ext import commands
 from discord.utils import get
+
 from utils.embed import yaml_file_to_message
 
 
@@ -8,18 +9,17 @@ class Admin(commands.Cog):
         self.bot = bot
 
     async def _refresh(self, ctx: commands.Context, filename: str, channel_name: str):
-        target_channel = get(ctx.guild.text_channels,
-                             name=channel_name)
+        target_channel = get(ctx.guild.text_channels, name=channel_name)
         async for msg in target_channel.history():
             if msg.author.id == self.bot.user.id:
                 target = msg
         m, e, _ = yaml_file_to_message(filename)
         await target.edit(message=m, embed=e)
 
-    @commands.group(name="refresh", invoke_without_subcommand=False)
+    @commands.group(name="refresh", invoke_without_subcommand=True)
     @commands.is_owner()
     async def refresh(self, ctx: commands.Context):
-        pass
+        await ctx.send_help()
 
     @refresh.command(name="roles")
     async def refresh_roles(self, ctx: commands.Context):
