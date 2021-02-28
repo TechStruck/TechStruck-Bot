@@ -11,6 +11,9 @@ from config.common import config
 from config.oauth import github_oauth_config
 from models import UserModel
 
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
+from io import BytesIO
 
 class GithubNotLinkedError(commands.CommandError):
     def __str__(self):
@@ -121,7 +124,61 @@ class Github(commands.Cog):
         )
 
         await ctx.send(embed=em)
+        
+        
+    @commands.command(name="githubstats", aliases=["ghstats", "ghst"])
+    async def github_stats(self, ctx, username="codewithswastik", theme="radical"):
+        theme = theme.lower()
+        themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split(
+            " "
+        )
+        if theme not in themes:
+            return await ctx.send(
+                "Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula"
+            )
+        url = "https://github-readme-stats.codestackr.vercel.app/api?" + urlencode(
+            {
+                "username": username,
+                "show_icons": "true",
+                "hide_border": "true",
+                "theme": theme,
+            }
+        )
 
+        url = f"https://github-readme-stats.codestackr.vercel.app/api?username={username}&show_icons=true&hide_border=true&theme={theme}"
+
+        file = await self.get_file_from_svg_url(url, exclude=[b"A++", b"A+"])
+        await ctx.send(file=discord.File(file, filename="stats.png"))
+
+    @commands.command(name="githublanguages", aliases=["ghlangs", "ghtoplangs"])
+    async def github_top_languages(
+        self, ctx, username="codewithswastik", theme="radical"
+    ):
+        theme = theme.lower()
+        themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split(
+            " "
+        )
+        if theme not in themes:
+            return await ctx.send(
+                "Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula"
+            )
+        url = (
+            "https://github-readme-stats.codestackr.vercel.app/api/top-langs/?"
+            + urlencode({"username": username, "theme": theme})
+        )
+        file = await self.get_file_from_svg_url(url)
+        await ctx.send(file=discord.File(file, filename="langs.png"))
+
+    async def get_file_from_svg_url(self, url, exclude=[], fmt="PNG"):
+        res = await (await self.session.get(url)).content.read()
+        for i in exclude:
+            res = res.replace(
+                i, b""
+            )  # removes everything that needs to be excluded (eg. the uncentered A+)
+        drawing = svg2rlg(BytesIO(res))
+        file = BytesIO(renderPM.drawToString(drawing, fmt=fmt))
+        return file
+    
     @staticmethod
     def repo_desc_format(result):
         description = result["description"]
