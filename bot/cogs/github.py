@@ -132,6 +132,16 @@ class Github(commands.Cog):
         themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split(" ")
         if theme not in themes:
             return await ctx.send("Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula")
+        url = "https://github-readme-stats.codestackr.vercel.app/api?" + urlencode(
+            {
+                "username": username,
+                "show_icons": "true",
+                "hide_border": "true",
+                "theme":theme
+            }
+        )
+        
+        
         url = f"https://github-readme-stats.codestackr.vercel.app/api?username={username}&show_icons=true&hide_border=true&theme={theme}"
         
         file = await self.get_file_from_svg_url(url, exclude = [b"A++",b"A+"])
@@ -143,8 +153,12 @@ class Github(commands.Cog):
         themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split(" ")
         if theme not in themes:
             return await ctx.send("Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula")
-        url = f"https://github-readme-stats.codestackr.vercel.app/api/top-langs/?username={username}&theme={theme}"
-
+        url = "https://github-readme-stats.codestackr.vercel.app/api/top-langs/?" + urlencode(
+            {
+                "username": username,
+                "theme":theme
+            }
+        )
         file = await self.get_file_from_svg_url(url)
         await ctx.send(file = discord.File(file,filename="langs.png"))
        
