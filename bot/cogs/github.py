@@ -133,13 +133,30 @@ class Github(commands.Cog):
         if theme not in themes:
             return await ctx.send("Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula")
         url = f"https://github-readme-stats.codestackr.vercel.app/api?username={username}&show_icons=true&hide_border=true&theme={theme}"
-        res = await (await self.session.get(url)).content.read()
-
-        clean_res = res.replace(b"A+",b"") #removes the uncentered A+
-        drawing = svg2rlg(BytesIO(clean_res))
-        file = BytesIO(renderPM.drawToString(drawing, fmt="PNG"))
+        
+        
+        file = await getFileFromSVGURL(url, exclude = [b"A+"])
         await ctx.send(file = discord.File(file,filename="stats.png"))
+        
+    @commands.command(name="githublanguages", aliases=["ghlangs", "ghtoplangs"])     
+    async def github_top_languages(ctx,username = "codewithswastik",theme="radical"):
+        theme = theme.lower()
+        themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split(" ")
+        if theme not in themes:
+            return await ctx.send("Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula")
+        url = f"https://github-readme-stats.codestackr.vercel.app/api/top-langs/?username={username}&theme={theme}"
 
+        file = await getFileFromSVGURL(url)
+        await ctx.send(file = discord.File(file,filename="langs.png"))
+ 
+       
+    async def getFileFromSVGURL(url,exclude = [], fmt="PNG"):
+        res = await (await self.session.get(url)).content.read()
+        for i in exclude:
+            res = res.replace(i,b"") #removes everything that needs to be excluded (eg. the uncentered A+)
+        drawing = svg2rlg(BytesIO(res))
+        file = BytesIO(renderPM.drawToString(drawing, fmt=fmt))
+        return file
         
     @staticmethod
     def repo_desc_format(result):
