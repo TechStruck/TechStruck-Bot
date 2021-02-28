@@ -1,8 +1,9 @@
 import discord
 from discord.ext import commands
 
-bot_links = """[Support/Beta-Testing/Suggestions](https://discord.gg/KgZRMch3b6)
-[Github](https://github.com/FalseDev/Tech-struck)"""
+bot_links = """[Support](https://discord.gg/KgZRMch3b6)\u2800\
+[Github](https://github.com/FalseDev/Tech-struck)\u2800\
+[Suggestions](https://github.com/FalseDev/Tech-struck/issues)"""
 
 
 class HelpCommand(commands.HelpCommand):
@@ -51,7 +52,7 @@ class HelpCommand(commands.HelpCommand):
         filtered = await self.filter_commands(cog.get_commands(), sort=True)
         for command in filtered:
             embed.add_field(
-                name=self.get_command_signature(command),
+                name=command.qualified_name,
                 value=command.short_doc or "...",
                 inline=False,
             )
@@ -65,11 +66,10 @@ class HelpCommand(commands.HelpCommand):
         if group.help:
             embed.description = group.help
 
-        if isinstance(group, commands.Group):
-            filtered = await self.filter_commands(group.commands, sort=True)
-            for command in filtered:
+        filtered = await self.filter_commands(group.commands, sort=True)
+        for command in filtered:
                 embed.add_field(
-                    name=self.get_command_signature(command),
+                    name=command.qualified_name,
                     value=command.short_doc or "...",
                     inline=False,
                 )
@@ -79,9 +79,17 @@ class HelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     def add_support_server(self, embed):
-        return embed.add_field(name="Support server", value=bot_links)
+        return embed.add_field(name="Links", value=bot_links)
 
-    send_command_help = send_group_help
+    async def send_command_help(self, command):
+        embed = discord.Embed(title=command.qualified_name, colour=self.COLOUR)
+        embed.add_field(name="Signatute", value=self.get_command_signature(command))
+        if command.help:
+            embed.description = command.help
+
+        embed.set_footer(text=self.get_ending_note())
+        self.add_support_server(embed)
+        await self.get_destination().send(embed=embed)
 
 
 def setup(bot: commands.Bot):
