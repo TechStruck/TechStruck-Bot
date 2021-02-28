@@ -11,6 +11,9 @@ from config.common import config
 from config.oauth import github_oauth_config
 from models import UserModel
 
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
+import io
 
 class GithubNotLinkedError(commands.CommandError):
     def __str__(self):
@@ -121,7 +124,23 @@ class Github(commands.Cog):
         )
 
         await ctx.send(embed=em)
+        
+        
+    @commands.command(name="githubstats", aliases=["ghstats", "ghst"])
+    async def github_stats(ctx,username = "codewithswastik",theme="radical"):
+        theme = theme.lower()
+        themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split(" ")
+        if theme not in themes:
+            return await ctx.send("Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula")
+        url = f"https://github-readme-stats.codestackr.vercel.app/api?username={username}&show_icons=true&hide_border=true&theme={theme}"
+        res = await (await self.session.get(url)).content.read()
 
+        clean_res = res.replace(b"A+",b"") #removes the uncentered A+
+        drawing = svg2rlg(BytesIO(clean_res))
+        file = BytesIO(renderPM.drawToString(drawing, fmt="PNG"))
+        await ctx.send(file = discord.File(file,filename="stats.png"))
+
+        
     @staticmethod
     def repo_desc_format(result):
         description = result["description"]
