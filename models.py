@@ -63,11 +63,16 @@ class JokeModel(Model):
     end = fields.CharField(max_length=50, description="Joke end")
     tags = fields.JSONField(default=[], description="List of tags")
 
-    accepted = fields.BooleanField(default=False, description="Whether the joke has been accepted in")
+    accepted = fields.BooleanField(
+        default=False, description="Whether the joke has been accepted in"
+    )
 
-    creator = fields.ForeignKeyField(model_name="main.UserModel", related_name="joke_submissions", description="User who submitted this Joke")
+    creator = fields.ForeignKeyField(
+        model_name="main.UserModel",
+        related_name="joke_submissions",
+        description="User who submitted this Joke",
+    )
 
     class Meta:
         table = "jokes"
         table_description = "User submitted jokes being collected"
-
