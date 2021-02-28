@@ -59,8 +59,8 @@ class UserModel(Model):
 class JokeModel(Model):
     id = fields.IntField(pk=True, description="Joke ID")
 
-    setup = fields.CharField(max_length=50, description="Joke setup")
-    end = fields.CharField(max_length=50, description="Joke end")
+    setup = fields.CharField(max_length=150, description="Joke setup")
+    end = fields.CharField(max_length=150, description="Joke end")
     tags = fields.JSONField(default=[], description="List of tags")
 
     accepted = fields.BooleanField(
