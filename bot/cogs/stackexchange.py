@@ -1,14 +1,21 @@
 import datetime
+import json
 import html
+import os
 from urllib.parse import urlencode
+import traceback
 
 from discord import Color, Embed, Member
-from discord.ext import commands
+from discord.ext import commands, flags, tasks
 from jose import jwt
+from cachetools import TTLCache
 
 from config.common import config
 from config.oauth import stack_oauth_config
 from models import UserModel
+
+
+search_result_template = "[View]({site[site_url]}/q/{q[question_id]})\u2800\u2800Score: {q[score]}\u2800\u2800Tags: {tags}"
 
 
 class StackExchangeNotLinkedError(commands.CommandError):
@@ -16,24 +23,59 @@ class StackExchangeNotLinkedError(commands.CommandError):
         return "Your stackexchange account hasn't been linked yet, please use the `linkstack` command to do it"
 
 
+class StackExchangeError(commands.CommandError):
+    pass
+
+
 class Stackexchange(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.base_url = "https://api.stackexchange.com/2.2"
-        self.search_result_template = "[View](https://stackoverflow.com/q/{})\u2800\u2800Score: {}\u2800\u2800Tags: {}"
+        self.ready = False
+        self.sites = None
+        self.token_cache = TTLCache(maxsize=1000, ttl=600)
+        self.load_sites.start()
 
     @property
     def session(self):
         return self.bot.http._HTTPClient__session
 
+    @tasks.loop(count=1)
+    async def load_sites(self):
+        if os.path.isfile("cache/stackexchange_sites.json"):
+            with open("cache/stackexchange_sites.json") as f:
+                self.sites = json.load(f)
+        else:
+            try:
+                data = await self.stack_request(
+                    None, "GET", "/sites", params={"pagesize": "500"}
+                )
+            except Exception:
+                return traceback.print_exc()
+            else:
+                self.sites = data["items"]
+                if not os.path.isdir("cache"):
+                    os.mkdir("cache")
+                with open("cache/stackexchange_sites.json", "w") as f:
+                    json.dump(self.sites, f)
+
+        self.ready = True
+
     async def cog_check(self, ctx: commands.Context):
-        user = await UserModel.get_or_none(id=ctx.author.id)
-        if ctx.command != self.link_stackoverflow and (
-            user is None or user.stackoverflow_oauth_token is None
-        ):
-            raise StackExchangeNotLinkedError()
-        ctx.user_obj = user
+        if not self.ready:
+            raise StackExchangeError("Stackexchange commands are not ready yet")
         return True
+
+    async def cog_before_invoke(self, ctx: commands.Context):
+        token = self.token_cache.get(ctx.author.id)
+        if not token:
+            user = await UserModel.get_or_none(id=ctx.author.id)
+            if ctx.command != self.link_stackoverflow and (
+                user is None or user.stackoverflow_oauth_token is None
+            ):
+                raise StackExchangeNotLinkedError()
+            token = user.stackoverflow_oauth_token
+            self.token_cache[ctx.author.id] = token
+        ctx.stack_token = token
 
     @commands.command(
         name="stackrep",
@@ -43,46 +85,93 @@ class Stackexchange(commands.Cog):
         """Check your stackoverflow reputation"""
         # TODO: Use a stackexchange filter here
         # https://api.stackexchange.com/docs/filters
-        res = await self.session.get(
-            self.base_url + "/me",
+        data = await self.stack_request(
+            ctx,
+            "GET",
+            "/me",
             data={
-                **stack_oauth_config.dict(),
-                "access_token": ctx.user_obj.stackoverflow_oauth_token,
                 "site": "stackoverflow",
             },
         )
-        data = await res.json()
         await ctx.send(data["items"][0]["reputation"])
 
-    @commands.command(name="stacksearch", aliases=["stackser"])
-    async def stackoverflow_search(self, ctx: commands.Context, *, term: str):
-        """Search stackoverflow for your error/issue"""
-        res = await self.session.get(
-            self.base_url + "/search/excerpts",
+    @flags.add_flag("--site", type=str, default="stackoverflow")
+    @flags.add_flag("term", nargs="+")
+    @flags.command(name="stacksearch", aliases=["stackser"])
+    async def stackexchange_search(self, ctx: commands.Context, **kwargs):
+        """Search stackexchange for your question"""
+        term, sitename = " ".join(kwargs["term"]), kwargs["site"]
+
+        site = None
+        for s in self.sites:
+            if s["api_site_parameter"] == sitename:
+                site = s
+                break
+        if not site:
+            raise StackExchangeError(f"Invalid site {sitename} provided")
+
+        data = await self.stack_request(
+            ctx,
+            "GET",
+            "/search/excerpts",
             data={
-                **stack_oauth_config.dict(),
-                "access_token": ctx.user_obj.stackoverflow_oauth_token,
-                "site": "stackoverflow",
+                "site": sitename,
                 "sort": "relevance",
                 "q": term,
                 "pagesize": 5,
+                "filter": "ld-5YXYGN1SK1e",
             },
         )
-        data = await res.json()
-        embed = Embed(title="Stackoverflow search", color=Color.green())
+        embed = Embed(title=f"{site['name']} search", color=Color.green())
+        embed.set_thumbnail(url=site["icon_url"])
         if data["items"]:
             for i, q in enumerate(data["items"], 1):
                 tags = "\u2800".join(["`" + t + "`" for t in q["tags"]])
                 embed.add_field(
                     name=str(i) + " " + html.unescape(q["title"]),
-                    value=self.search_result_template.format(
-                        q["question_id"], q["score"], tags
-                    ),
+                    value=search_result_template.format(site=site, q=q, tags=tags),
                     inline=False,
                 )
         else:
             embed.add_field(name="Oops", value="Couldn't find any results")
         await ctx.send(embed=embed)
+
+    @commands.command(name="stacksites")
+    async def sites_command(self, ctx: commands.Context):
+        embed = Embed(title="StackExchange sites")
+        sites = [
+            "[{0[name]}]({0[site_url]}) (`{0[api_site_parameter]}`)".format(s)
+            for s in self.sites
+        ]
+        embed.add_field(name="Part 1", value="\n".join(sites[::4]))
+        embed.add_field(name="Part 2", value="\n".join(sites[1::4]))
+        embed.add_field(name="Part 3", value="\n".join(sites[2::4]))
+        embed.add_field(name="Part 4", value="\n".join(sites[3::4]))
+        # embed.add_field(name="Part 5", value="\n".join(sites[3::2]))
+        await ctx.send(embed=embed)
+
+    async def stack_request(
+        self,
+        ctx: commands.Context,
+        method: str,
+        endpoint: str,
+        params: dict = {},
+        data: dict = {},
+    ):
+        data.update(stack_oauth_config.dict())
+        if ctx:
+            data["access_token"] = (ctx.stack_token,)
+        res = await self.session.request(
+            method,
+            f"https://api.stackexchange.com/2.2{endpoint}",
+            params=params,
+            data=data,
+        )
+
+        data = await res.json()
+        if "error_message" in data:
+            raise StackExchangeError(data["error_message"])
+        return data
 
     @commands.command(name="linkstack", aliases=["lnstack"])
     async def link_stackoverflow(self, ctx: commands.Context):
