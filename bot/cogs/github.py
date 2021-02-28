@@ -1,28 +1,34 @@
 import datetime
 import re
+from io import BytesIO
 from urllib.parse import urlencode
 
-from discord import Color, Embed, Member
+from cachetools import TTLCache
+from discord import Color, Embed, File, Member
 from discord.ext import commands
 from jose import jwt
-from cachetools import TTLCache
+from reportlab.graphics import renderPM
+from svglib.svglib import svg2rlg
 
 from config.common import config
 from config.oauth import github_oauth_config
 from models import UserModel
 
-from svglib.svglib import svg2rlg
-from reportlab.graphics import renderPM
-from io import BytesIO
 
 class GithubNotLinkedError(commands.CommandError):
     def __str__(self):
         return "Your github account hasn't been linked yet, please use the `linkgithub` command to do it"
 
 
+class InvalidTheme(commands.CommandError):
+    def __str__(self):
+        return "Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula"
+
+
 class Github(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split()
         self.files_regex = re.compile(r"\s{0,}```\w{0,}\s{0,}")
         self.token_cache = TTLCache(maxsize=1000, ttl=600)
 
@@ -41,7 +47,6 @@ class Github(commands.Cog):
             token = user.github_oauth_token
             self.token_cache[ctx.author.id] = token
         ctx.gh_token = token
-        return True
 
     @commands.command(name="linkgithub", aliases=["lngithub"])
     async def link_github(self, ctx: commands.Context):
@@ -124,53 +129,41 @@ class Github(commands.Cog):
         )
 
         await ctx.send(embed=em)
-        
-        
+
     @commands.command(name="githubstats", aliases=["ghstats", "ghst"])
-    async def github_stats(self, ctx, username="codewithswastik", theme="radical"):
-        theme = theme.lower()
-        themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split(
-            " "
-        )
-        if theme not in themes:
-            return await ctx.send(
-                "Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula"
-            )
-        url = "https://github-readme-stats.codestackr.vercel.app/api?" + urlencode(
-            {
+    async def github_stats(self, ctx:commands.Context, username: str, theme="radical"):
+        theme = self.process_theme(theme)
+
+        url = "https://github-readme-stats.codestackr.vercel.app/api"
+
+        file = await self.get_file_from_svg_url(
+            url,
+            params={
                 "username": username,
                 "show_icons": "true",
                 "hide_border": "true",
                 "theme": theme,
-            }
+            },
+            exclude=[b"A++", b"A+"],
         )
-
-        url = f"https://github-readme-stats.codestackr.vercel.app/api?username={username}&show_icons=true&hide_border=true&theme={theme}"
-
-        file = await self.get_file_from_svg_url(url, exclude=[b"A++", b"A+"])
-        await ctx.send(file=discord.File(file, filename="stats.png"))
+        await ctx.send(file=File(file, filename="stats.png"))
 
     @commands.command(name="githublanguages", aliases=["ghlangs", "ghtoplangs"])
     async def github_top_languages(
-        self, ctx, username="codewithswastik", theme="radical"
+        self, ctx: commands.Context, username: str, theme: str = "radical"
     ):
-        theme = theme.lower()
-        themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split(
-            " "
-        )
-        if theme not in themes:
-            return await ctx.send(
-                "Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula"
-            )
-        url = (
-            "https://github-readme-stats.codestackr.vercel.app/api/top-langs/?"
-            + urlencode({"username": username, "theme": theme})
-        )
-        file = await self.get_file_from_svg_url(url)
-        await ctx.send(file=discord.File(file, filename="langs.png"))
+        theme = self.process_theme(theme)
+        url = "https://github-readme-stats.codestackr.vercel.app/api/top-langs/"
 
-    async def get_file_from_svg_url(self, url, exclude=[], fmt="PNG"):
-        res = await (await self.session.get(url)).content.read()
+        file = await self.get_file_from_svg_url(
+            url, params={"username": username, "theme": theme}
+        )
+        await ctx.send(file=File(file, filename="langs.png"))
+
+    async def get_file_from_svg_url(
+        self, url: str, *, params={}, exclude=[], fmt="PNG"
+    ):
+        res = await (await self.session.get(url, params=params)).content.read()
         for i in exclude:
             res = res.replace(
                 i, b""
@@ -178,7 +171,13 @@ class Github(commands.Cog):
         drawing = svg2rlg(BytesIO(res))
         file = BytesIO(renderPM.drawToString(drawing, fmt=fmt))
         return file
-    
+
+    def process_theme(self, theme):
+        theme = theme.lower()
+        if theme not in self.themes:
+            raise InvalidTheme()
+        return theme
+
     @staticmethod
     def repo_desc_format(result):
         description = result["description"]
