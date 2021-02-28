@@ -14,6 +14,6 @@ PyYAML==5.4.1
 quizapi==0.1.0
 requests==2.25.1
 svglib==1.0.1
-tortoise-orm[asyncpg]==0.16.19; python_version > '3.6'
+tortoise-orm[asyncpg]==0.16.21; python_version > '3.6'
 async-exit-stack; python_version < '3.7'
 async-generator; python_version < '3.7'
