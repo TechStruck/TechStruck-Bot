@@ -1,4 +1,4 @@
-aerich==0.4.3; python_version > '3.6'
+aerich==0.5.0; python_version > '3.6'
 aPRAW==0.6.8a0
 asyncpg==0.22.0
 backports-datetime-fromisoformat==1.0.0; python_version < '3.7'
