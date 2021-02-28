@@ -68,11 +68,11 @@ class HelpCommand(commands.HelpCommand):
 
         filtered = await self.filter_commands(group.commands, sort=True)
         for command in filtered:
-                embed.add_field(
-                    name=command.qualified_name,
-                    value=command.short_doc or "...",
-                    inline=False,
-                )
+            embed.add_field(
+                name=command.qualified_name,
+                value=command.short_doc or "...",
+                inline=False,
+            )
 
         embed.set_footer(text=self.get_ending_note())
         self.add_support_server(embed)
