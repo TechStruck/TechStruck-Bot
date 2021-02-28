@@ -13,7 +13,7 @@ from models import UserModel
 
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
-import io
+from io import BytesIO
 
 class GithubNotLinkedError(commands.CommandError):
     def __str__(self):
