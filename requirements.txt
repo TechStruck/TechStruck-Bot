@@ -1,6 +1,6 @@
 aerich==0.4.3; python_version > '3.6'
 aPRAW==0.6.8a0
-asyncpg==0.21.0
+asyncpg==0.22.0
 backports-datetime-fromisoformat==1.0.0; python_version < '3.7'
 cachetools==4.2.1
 discord.py==1.6.0
