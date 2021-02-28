@@ -27,7 +27,7 @@ class Github(commands.Cog):
     def session(self):
         return self.bot.http._HTTPClient__session
 
-    async def cog_check(self, ctx: commands.Context):
+    async def cog_before_invoke(self, ctx: commands.Context):
         token = self.token_cache.get(ctx.author.id)
         if not token:
             user = await UserModel.get_or_none(id=ctx.author.id)
