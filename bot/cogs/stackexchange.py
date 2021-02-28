@@ -136,20 +136,6 @@ class Stackexchange(commands.Cog):
             embed.add_field(name="Oops", value="Couldn't find any results")
         await ctx.send(embed=embed)
 
-    @commands.command(name="stacksites")
-    async def sites_command(self, ctx: commands.Context):
-        embed = Embed(title="StackExchange sites")
-        sites = [
-            "[{0[name]}]({0[site_url]}) (`{0[api_site_parameter]}`)".format(s)
-            for s in self.sites
-        ]
-        embed.add_field(name="Part 1", value="\n".join(sites[::4]))
-        embed.add_field(name="Part 2", value="\n".join(sites[1::4]))
-        embed.add_field(name="Part 3", value="\n".join(sites[2::4]))
-        embed.add_field(name="Part 4", value="\n".join(sites[3::4]))
-        # embed.add_field(name="Part 5", value="\n".join(sites[3::2]))
-        await ctx.send(embed=embed)
-
     async def stack_request(
         self,
         ctx: commands.Context,
