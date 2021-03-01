@@ -138,11 +138,7 @@ class Github(commands.Cog):
 
         url = "https://github-readme-stats.codestackr.vercel.app/api"
 
-        if not username:
-            username = (
-                await (await self.github_request(ctx, "GET", "/user")).json()
-            ).get("login")
-            print(username)
+        username = username or await self.get_gh_user(ctx)
 
         file = await self.get_file_from_svg_url(
             url,
@@ -158,8 +154,10 @@ class Github(commands.Cog):
 
     @commands.command(name="githublanguages", aliases=["ghlangs", "ghtoplangs"])
     async def github_top_languages(
-        self, ctx: commands.Context, username: str, theme: str = "radical"
+        self, ctx: commands.Context, username: str = None, theme: str = "radical"
     ):
+
+        username = username or await self.get_gh_user(ctx)
         theme = self.process_theme(theme)
         url = "https://github-readme-stats.codestackr.vercel.app/api/top-langs/"
 
@@ -208,6 +206,10 @@ class Github(commands.Cog):
             json=json,
             headers={"Authorization": f"Bearer {ctx.gh_token}"},
         )
+
+    async def get_gh_user(self, ctx: commands.Context):
+        response = await (await self.github_request(ctx, "GET", "/user")).json()
+        return response.get("login")
 
 
 def setup(bot: commands.Bot):
