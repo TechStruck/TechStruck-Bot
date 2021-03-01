@@ -47,7 +47,10 @@ class Stackexchange(commands.Cog):
         else:
             try:
                 data = await self.stack_request(
-                    None, "GET", "/sites", params={"pagesize": "500"}
+                    None,
+                    "GET",
+                    "/sites",
+                    params={"pagesize": "500", "filter": "*Ids4-aWV*RW_UxCPr0D"},
                 )
             except Exception:
                 return traceback.print_exc()
@@ -66,13 +69,15 @@ class Stackexchange(commands.Cog):
         return True
 
     async def cog_before_invoke(self, ctx: commands.Context):
+        if ctx.command == self.link_stackoverflow:
+            return
+
         token = self.token_cache.get(ctx.author.id)
         if not token:
             user = await UserModel.get_or_none(id=ctx.author.id)
-            if ctx.command != self.link_stackoverflow and (
-                user is None or user.stackoverflow_oauth_token is None
-            ):
+            if user is None or user.stackoverflow_oauth_token is None:
                 raise StackExchangeNotLinkedError()
+
             token = user.stackoverflow_oauth_token
             self.token_cache[ctx.author.id] = token
         ctx.stack_token = token

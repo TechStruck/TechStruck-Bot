@@ -37,12 +37,13 @@ class Github(commands.Cog):
         return self.bot.http._HTTPClient__session
 
     async def cog_before_invoke(self, ctx: commands.Context):
+        if ctx.command == self.link_github:
+            return
+
         token = self.token_cache.get(ctx.author.id)
         if not token:
             user = await UserModel.get_or_none(id=ctx.author.id)
-            if ctx.command != self.link_github and (
-                user is None or user.github_oauth_token is None
-            ):
+            if user is None or user.github_oauth_token is None:
                 raise GithubNotLinkedError()
             token = user.github_oauth_token
             self.token_cache[ctx.author.id] = token
