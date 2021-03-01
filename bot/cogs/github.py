@@ -137,7 +137,8 @@ class Github(commands.Cog):
         url = "https://github-readme-stats.codestackr.vercel.app/api"
 
         if not username:
-            username = (await self.github_request(ctx, 'GET', '/user')).get('login')
+            username = (await (await self.github_request(ctx, 'GET', '/user')).json()).get('login')
+            print(username)
 
         file = await self.get_file_from_svg_url(
             url,
