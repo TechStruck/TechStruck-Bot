@@ -1,6 +1,6 @@
 This repository contains code for the `Tech Struck` bot and all other automated/programmed components of the server
 
-## FAQ
+## FAQ 
 
 ### What is Tech Struck?
 
