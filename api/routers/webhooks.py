@@ -5,7 +5,7 @@ from typing import List
 
 from aiohttp import ClientSession
 from praw import Reddit
-from discord import RequestsWebhookAdapter, Color, Embed, Webhook
+from discord import AsyncWebhookAdapter, RequestsWebhookAdapter, Color, Embed, Webhook
 from fastapi import APIRouter, Depends
 
 from config.reddit import reddit_config
@@ -68,7 +68,7 @@ async def git_tip(session: ClientSession = Depends(aiohttp_session)):
     async with session.get(tips_json_url) as res:
         tips = json.loads(await res.text())
 
-    tip_no = (datetime.date.today() - datetime.date(2021, 1, 28)).days
+    tip_no = (datetime.date.today() - datetime.date(2021, 1, 31)).days
 
     tip = tips[tip_no]
 
