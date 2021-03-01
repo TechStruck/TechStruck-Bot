@@ -131,13 +131,17 @@ class Github(commands.Cog):
         await ctx.send(embed=em)
 
     @commands.command(name="githubstats", aliases=["ghstats", "ghst"])
-    async def github_stats(self, ctx: commands.Context, username: str = None, theme="radical"):
+    async def github_stats(
+        self, ctx: commands.Context, username: str = None, theme="radical"
+    ):
         theme = self.process_theme(theme)
 
         url = "https://github-readme-stats.codestackr.vercel.app/api"
 
         if not username:
-            username = (await (await self.github_request(ctx, 'GET', '/user')).json()).get('login')
+            username = (
+                await (await self.github_request(ctx, "GET", "/user")).json()
+            ).get("login")
             print(username)
 
         file = await self.get_file_from_svg_url(
