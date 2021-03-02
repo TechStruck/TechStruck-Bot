@@ -3,8 +3,6 @@ import re
 from io import BytesIO
 from urllib.parse import urlencode
 
-import discord
-
 from cachetools import TTLCache
 from discord import Color, Embed, File, Member, Message
 from discord.ext import commands
@@ -92,14 +90,26 @@ class Github(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: Message):
+        ctx: commands.Context = await self.bot.get_context(message)
         try:
-            ctx: commands.Context = await self.bot.get_context(message)
             ctx.gh_token = await self.get_gh_token(ctx)
         except GithubNotLinkedError:
             return
-        
-        await self.redirect_attachments(ctx)
-       
+        try:
+            code_file = ctx.message.attachments[0]
+            if code_file.filename == "message.txt":
+                file_content_bytes = await code_file.read()
+                file_content_str = file_content_bytes.decode('utf-8')
+                req = await self.github_request(
+                    ctx,
+                    "POST",
+                    "/gists",
+                    json={"files": {"": {"content": str(file_content_str)}}},
+                )
+                res = await req.json()
+                await ctx.send(res.get("html_url", "Something went wrong."))
+        except IndexError:
+            pass
 
     @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
     async def github_search(self, ctx: commands.Context, *, term: str):
@@ -227,49 +237,6 @@ class Github(commands.Cog):
             self.token_cache[ctx.author.id] = token
         return token
 
-    
-    async def redirect_attachments(self, ctx: commands.Context):
-        message: Message = ctx.message
-        attachment = message.attachments[0]
-        if not attachment.filename.endswith(('.txt', '.py', '.json')):
-            return
-
-        # If this file is more than 2MiB then it's definitely too big
-        if attachment.size > (2 * 1024 * 1024):
-            return
-
-        try:
-            contents = await attachment.read()
-            contents = contents.decode('utf-8')
-        except (UnicodeDecodeError, discord.HTTPException):
-            return
-
-        description = f'A file by {message.author} in the {message.guild.name} guild'
-        gist = await self.create_gist(ctx, contents, description=description, filename=attachment.filename)
-        return gist
-
-
-    async def create_gist(self, ctx: commands.Context, content: str, description: str=None, filename: str=None) -> dict:
-        filename = filename or 'output.txt'
-
-        data = {
-            "files": 
-                {
-                    filename: {"content": content}
-                }
-            }
-
-        if description:
-            data['description'] = description
-
-        req = await self.github_request(
-                    ctx,
-                    "POST",
-                    "/gists",
-                    json=data,
-                )
-        res = await req.json()
-        return res
 
 def setup(bot: commands.Bot):
     bot.add_cog(Github(bot))
