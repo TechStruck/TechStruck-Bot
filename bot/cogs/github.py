@@ -3,8 +3,10 @@ import re
 from io import BytesIO
 from urllib.parse import urlencode
 
+import discord
+
 from cachetools import TTLCache
-from discord import Color, Embed, File, Member
+from discord import Color, Embed, File, Member, Message
 from discord.ext import commands
 from jose import jwt
 from reportlab.graphics import renderPM
@@ -37,16 +39,7 @@ class Github(commands.Cog):
         return self.bot.http._HTTPClient__session
 
     async def cog_before_invoke(self, ctx: commands.Context):
-        token = self.token_cache.get(ctx.author.id)
-        if not token:
-            user = await UserModel.get_or_none(id=ctx.author.id)
-            if ctx.command != self.link_github and (
-                user is None or user.github_oauth_token is None
-            ):
-                raise GithubNotLinkedError()
-            token = user.github_oauth_token
-            self.token_cache[ctx.author.id] = token
-        ctx.gh_token = token
+        ctx.gh_token = await self.get_gh_token(ctx)
 
     @commands.command(name="linkgithub", aliases=["lngithub"])
     async def link_github(self, ctx: commands.Context):
@@ -69,7 +62,7 @@ class Github(commands.Cog):
         )
 
     @commands.command(name="creategist", aliases=["crgist"])
-    async def create_gist(self, ctx: commands.Context, *, inp):
+    async def create_gist(self, ctx: commands.Context, *, inp=None):
         """
         Create gists from within discord
 
@@ -90,12 +83,23 @@ class Github(commands.Cog):
             name: {"content": content + "\n"}
             for name, content in zip(files_and_names[0::2], files_and_names[1::2])
         }
-
+        print(files)
         req = await self.github_request(ctx, "POST", "/gists", json={"files": files})
 
         res = await req.json()
         # TODO: Make this more verbose to the user and log errors
         await ctx.send(res.get("html_url", "Something went wrong."))
+
+    @commands.Cog.listener()
+    async def on_message(self, message: Message):
+        try:
+            ctx: commands.Context = await self.bot.get_context(message)
+            ctx.gh_token = await self.get_gh_token(ctx)
+        except GithubNotLinkedError:
+            return
+        
+        await self.redirect_attachments(ctx)
+       
 
     @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
     async def github_search(self, ctx: commands.Context, *, term: str):
@@ -211,6 +215,61 @@ class Github(commands.Cog):
         response = await (await self.github_request(ctx, "GET", "/user")).json()
         return response.get("login")
 
+    async def get_gh_token(self, ctx: commands.Context):
+        token = self.token_cache.get(ctx.author.id)
+        if not token:
+            user = await UserModel.get_or_none(id=ctx.author.id)
+            if ctx.command != self.link_github and (
+                user is None or user.github_oauth_token is None
+            ):
+                raise GithubNotLinkedError()
+            token = user.github_oauth_token
+            self.token_cache[ctx.author.id] = token
+        return token
+
+    
+    async def redirect_attachments(self, ctx: commands.Context):
+        message: Message = ctx.message
+        attachment = message.attachments[0]
+        if not attachment.filename.endswith(('.txt', '.py', '.json')):
+            return
+
+        # If this file is more than 2MiB then it's definitely too big
+        if attachment.size > (2 * 1024 * 1024):
+            return
+
+        try:
+            contents = await attachment.read()
+            contents = contents.decode('utf-8')
+        except (UnicodeDecodeError, discord.HTTPException):
+            return
+
+        description = f'A file by {message.author} in the {message.guild.name} guild'
+        gist = await self.create_gist(ctx, contents, description=description, filename=attachment.filename)
+        return gist
+
+
+    async def create_gist(self, ctx: commands.Context, content: str, description: str=None, filename: str=None) -> dict:
+        filename = filename or 'output.txt'
+
+        data = {
+            "files": 
+                {
+                    filename: {"content": content}
+                }
+            }
+
+        if description:
+            data['description'] = description
+
+        req = await self.github_request(
+                    ctx,
+                    "POST",
+                    "/gists",
+                    json=data,
+                )
+        res = await req.json()
+        return res
 
 def setup(bot: commands.Bot):
     bot.add_cog(Github(bot))
