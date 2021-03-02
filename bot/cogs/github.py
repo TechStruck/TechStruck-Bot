@@ -16,6 +16,21 @@ from config.common import config
 from config.oauth import github_oauth_config
 from models import UserModel
 
+ACCEPTED_FILE_EXTENSIONS = (
+    ".txt",
+    ".py",
+    ".json",
+    ".js",
+    ".tsx",
+    ".ts" ".c",
+    ".cpp",
+    ".rby",
+    ".vue",
+    ".svelte",
+    ".html",
+    ".css",
+)
+
 
 class GithubNotLinkedError(commands.CommandError):
     def __str__(self):
@@ -25,6 +40,11 @@ class GithubNotLinkedError(commands.CommandError):
 class InvalidTheme(commands.CommandError):
     def __str__(self):
         return "Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula"
+
+
+class CreateGistInputError(commands.CommandError):
+    def __str__(self):
+        return "A valid file or codeblock was not found in the refrenced message or the sent message. Plese use `help crgist` for more info."
 
 
 class Github(commands.Cog):
@@ -62,7 +82,7 @@ class Github(commands.Cog):
         )
 
     @commands.command(name="creategist", aliases=["crgist"])
-    async def create_github_gist(self, ctx: commands.Context, *, inp):
+    async def create_github_gist(self, ctx: commands.Context, *, inp=None):
         """
         Create gists from within discord
 
@@ -71,13 +91,46 @@ class Github(commands.Cog):
         ```
         # Codeblock with contents of filename.py
         ```
-
         filename2.txt
         ```
         Codeblock containing filename2.txt's contents
-        ```
+        ```inp
         """
-        files_and_names = self.files_regex.split(inp)[:-1]
+        await ctx.trigger_typing()
+
+        if inp:
+            res = await self.gist_from_codeblock(inp, ctx)
+
+        elif ctx.message.attachments:
+            res = await self.redirect_attachments(ctx)
+
+        elif ctx.message.reference:
+            ref: discord.MessageReference = ctx.message.reference
+            message: Message = await ctx.channel.fetch_message(ref.message_id)
+
+            ref_ctx = await self.bot.get_context(message)
+            ref_ctx.gh_token = await self.get_gh_token(ref_ctx)
+
+            if not message:
+                raise CreateGistInputError
+
+            if message.attachments:
+                res = await self.redirect_attachments(ref_ctx)
+            else:
+                res = await self.gist_from_codeblock(message.content, ref_ctx)
+
+        else:
+            raise CreateGistInputError()
+            return
+
+        # TODO: Make this more verbose to the user and log errors
+        await ctx.send(res.get("html_url", "Something went wrong."))
+
+    async def gist_from_codeblock(self, message: str, ctx: commands.Context):
+        """
+        Returns the link of gist from a codeblock!
+        """
+        files_and_names = self.files_regex.split(message)[:-1]
         # Dict comprehension to create the files 'object'
         files = {
             name: {"content": content + "\n"}
@@ -87,30 +140,7 @@ class Github(commands.Cog):
         req = await self.github_request(ctx, "POST", "/gists", json={"files": files})
         res = await req.json()
 
-        # TODO: Make this more verbose to the user and log errors
-        await ctx.send(res.get("html_url", "Something went wrong."))
-
-    @commands.Cog.listener()
-    async def on_message(self, message: Message):
-        """
-        Checks for code files in the chat and converts it into a gist
-        if conditions are met
-        """
-        if not message.attachments:
-            return
-
-        try:
-            ctx: commands.Context = await self.bot.get_context(message)
-            ctx.gh_token = await self.get_gh_token(ctx)
-        except GithubNotLinkedError:
-            return
-
-        gist = await self.redirect_attachments(ctx)
-
-        if not gist:
-            return
-
-        await ctx.send(gist.get("html_url", "Something went wrong."))
+        return res
 
     @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
     async def github_search(self, ctx: commands.Context, *, term: str):
@@ -244,11 +274,11 @@ class Github(commands.Cog):
 
         attachment = message.attachments[0]
 
-        if not attachment.filename.endswith((".txt", ".py", ".json")):
+        if not attachment.filename.endswith(ACCEPTED_FILE_EXTENSIONS):
             return False
 
-        # If this file is more than 2MiB then it's definitely too big
-        if attachment.size > (2 * 1024 * 1024):
+        # If this file is more than 20KB then it's definitely too big
+        if attachment.size > (20000):
             return False
 
         return True
