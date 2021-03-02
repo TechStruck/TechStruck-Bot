@@ -83,7 +83,7 @@ class Github(commands.Cog):
             name: {"content": content + "\n"}
             for name, content in zip(files_and_names[0::2], files_and_names[1::2])
         }
-            
+
         req = await self.github_request(ctx, "POST", "/gists", json={"files": files})
         res = await req.json()
 
@@ -93,7 +93,7 @@ class Github(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: Message):
         """
-        Checks for code files in the chat and converts it into a gist 
+        Checks for code files in the chat and converts it into a gist
         if conditions are met
         """
         if not message.attachments:
@@ -106,7 +106,7 @@ class Github(commands.Cog):
             return
 
         gist = await self.redirect_attachments(ctx)
-        
+
         if not gist:
             return
 
@@ -250,12 +250,12 @@ class Github(commands.Cog):
         # If this file is more than 2MiB then it's definitely too big
         if attachment.size > (2 * 1024 * 1024):
             return False
-        
+
         return True
 
     async def redirect_attachments(self, ctx: commands.Context):
         message: Message = ctx.message
-        
+
         if not await self.attachments_checker(message):
             return
 
