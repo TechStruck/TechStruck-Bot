@@ -1,18 +1,19 @@
 import re
 import traceback
-from typing import List
+from typing import Iterable
 
-from discord import Color, Embed, Intents, Member, Message
+from discord import Color, Embed, Intents, Message
 from discord.ext import commands, tasks
 from tortoise import Tortoise
 
-from models import UserModel
+from models import GuildModel
 
 
 class TechStruckBot(commands.Bot):
     def __init__(self, *, tortoise_config, load_extensions=True, loadjsk=True):
-        super().__init__(command_prefix=".", intents=Intents.all())
+        super().__init__(command_prefix=self.get_custom_prefix, intents=Intents.all())
         self.tortoise_config = tortoise_config
+        self.prefix_cache = {}
         self.connect_db.start()
 
         if load_extensions:
@@ -37,7 +38,7 @@ class TechStruckBot(commands.Bot):
         await Tortoise.init(self.tortoise_config)
         print("Database connected")
 
-    def load_extensions(self, extentions: List[str]):
+    def load_extensions(self, extentions: Iterable[str]):
         for ext in extentions:
             try:
                 self.load_extension(ext)
@@ -61,6 +62,20 @@ class TechStruckBot(commands.Bot):
         await ctx.send(
             embed=Embed(title=title, description=str(error), color=Color.red())
         )
+
+    async def get_custom_prefix(self, _, message: Message):
+        # DMs/Group
+        if not message.guild:
+            return "."
+
+        guild_id = message.guild.id
+        # Get from cache
+        if guild_id in self.prefix_cache:
+            return self.prefix_cache[guild_id]
+        # Fetch from db
+        guild, _ = await GuildModel.get_or_create(id=guild_id)
+        self.prefix_cache[guild_id] = guild.prefix
+        return guild.prefix
 
     async def on_ready(self):
         print("Ready!")
