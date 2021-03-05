@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 import re
 from io import BytesIO
 from urllib.parse import urlencode
@@ -13,6 +14,7 @@ from svglib.svglib import svg2rlg
 from config.common import config
 from config.oauth import github_oauth_config
 from models import UserModel
+from bot.utils.process_files import process_files
 
 
 class GithubNotLinkedError(commands.CommandError):
@@ -34,7 +36,7 @@ class Github(commands.Cog):
 
     @property
     def session(self):
-        return self.bot.http._HTTPClient__session
+        return self.bot.http._HTTPClient__session # type: ignore
 
     async def cog_before_invoke(self, ctx: commands.Context):
         if ctx.command == self.link_github:
@@ -47,7 +49,7 @@ class Github(commands.Cog):
                 raise GithubNotLinkedError()
             token = user.github_oauth_token
             self.token_cache[ctx.author.id] = token
-        ctx.gh_token = token
+        ctx.gh_token = token # type: ignore
 
     @commands.command(name="linkgithub", aliases=["lngithub"])
     async def link_github(self, ctx: commands.Context):
@@ -70,11 +72,17 @@ class Github(commands.Cog):
         )
 
     @commands.command(name="creategist", aliases=["crgist"])
-    async def create_gist(self, ctx: commands.Context, *, inp):
+    async def create_gist(self, ctx: commands.Context, *, inp:Optional[str]=None):
         """
         Create gists from within discord
 
+        Three ways to specify the files:
+        -   Reply to a message with attachments
+        -   Send attachments along with the command
+        -   Use a filename and codeblock... format
+
         Example:
+
         filename.py
         ```
         # Codeblock with contents of filename.py
@@ -85,18 +93,17 @@ class Github(commands.Cog):
         Codeblock containing filename2.txt's contents
         ```
         """
-        files_and_names = self.files_regex.split(inp)[:-1]
-        # Dict comprehension to create the files 'object'
-        files = {
-            name: {"content": content + "\n"}
-            for name, content in zip(files_and_names[0::2], files_and_names[1::2])
-        }
+
+        files, skipped = await process_files(ctx, inp)
 
         req = await self.github_request(ctx, "POST", "/gists", json={"files": files})
 
         res = await req.json()
         # TODO: Make this more verbose to the user and log errors
-        await ctx.send(res.get("html_url", "Something went wrong."))
+        embed = Embed(title="Gist creation", description=res.get("html_url", "Something went wrong."))
+        embed.add_field(name="Files", value="\n".join(files.keys()), inline=False)
+        if skipped: embed.add_field(name="Skipped files", value="\n".join(skipped), inline=False)
+        await ctx.send(embed=embed)
 
     @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
     async def github_search(self, ctx: commands.Context, *, term: str):

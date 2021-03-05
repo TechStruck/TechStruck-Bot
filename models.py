@@ -29,7 +29,7 @@ class ThankModel(Model):
 class GuildModel(Model):
     id = fields.BigIntField(pk=True, description="Discord ID of the guild")
     all_thanks: fields.ForeignKeyRelation[ThankModel]
-    prefix = fields.CharField(max_length=10, description="Custom prefix of the guild")
+    prefix = fields.CharField(max_length=10, default=".", description="Custom prefix of the guild")
 
     class Meta:
         table = "guilds"
