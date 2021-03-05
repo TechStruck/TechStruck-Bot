@@ -80,7 +80,7 @@ class Stackexchange(commands.Cog):
 
             token = user.stackoverflow_oauth_token
             self.token_cache[ctx.author.id] = token
-        ctx.stack_token = token
+        ctx.stack_token = token  # type: ignore
 
     @commands.command(
         name="stackrep",
@@ -101,11 +101,16 @@ class Stackexchange(commands.Cog):
         await ctx.send(data["items"][0]["reputation"])
 
     @flags.add_flag("--site", type=str, default="stackoverflow")
+    @flags.add_flag("--tagged", type=str, nargs="+", default=[])
     @flags.add_flag("term", nargs="+")
     @flags.command(name="stacksearch", aliases=["stackser"])
     async def stackexchange_search(self, ctx: commands.Context, **kwargs):
         """Search stackexchange for your question"""
-        term, sitename = " ".join(kwargs["term"]), kwargs["site"]
+        term, sitename, tagged = (
+            " ".join(kwargs["term"]),
+            kwargs["site"],
+            kwargs["tagged"],
+        )
 
         site = None
         for s in self.sites:
@@ -123,6 +128,7 @@ class Stackexchange(commands.Cog):
                 "site": sitename,
                 "sort": "relevance",
                 "q": term,
+                "tagged": ";".join(tagged),
                 "pagesize": 5,
                 "filter": "ld-5YXYGN1SK1e",
             },
