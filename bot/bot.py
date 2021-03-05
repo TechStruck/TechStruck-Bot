@@ -1,3 +1,4 @@
+import asyncio
 import re
 import traceback
 from typing import Iterable
@@ -13,6 +14,7 @@ class TechStruckBot(commands.Bot):
     def __init__(self, *, tortoise_config, load_extensions=True, loadjsk=True):
         super().__init__(command_prefix=self.get_custom_prefix, intents=Intents.all())
         self.tortoise_config = tortoise_config
+        self.db_connected = False
         self.prefix_cache = {}
         self.connect_db.start()
 
@@ -36,6 +38,7 @@ class TechStruckBot(commands.Bot):
     async def connect_db(self):
         print("Connecting to db")
         await Tortoise.init(self.tortoise_config)
+        self.db_connected = True
         print("Database connected")
 
     def load_extensions(self, extentions: Iterable[str]):
@@ -48,6 +51,8 @@ class TechStruckBot(commands.Bot):
     async def on_message(self, msg: Message):
         if msg.author.bot:
             return
+        while not self.db_connected:
+            await asyncio.sleep(0.2)
         await self.process_commands(msg)
 
     async def on_command_error(
