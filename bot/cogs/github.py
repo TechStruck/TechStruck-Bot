@@ -36,7 +36,7 @@ class Github(commands.Cog):
 
     @property
     def session(self):
-        return self.bot.http._HTTPClient__session # type: ignore
+        return self.bot.http._HTTPClient__session  # type: ignore
 
     async def cog_before_invoke(self, ctx: commands.Context):
         if ctx.command == self.link_github:
@@ -49,7 +49,7 @@ class Github(commands.Cog):
                 raise GithubNotLinkedError()
             token = user.github_oauth_token
             self.token_cache[ctx.author.id] = token
-        ctx.gh_token = token # type: ignore
+        ctx.gh_token = token  # type: ignore
 
     @commands.command(name="linkgithub", aliases=["lngithub"])
     async def link_github(self, ctx: commands.Context):
@@ -72,7 +72,7 @@ class Github(commands.Cog):
         )
 
     @commands.command(name="creategist", aliases=["crgist"])
-    async def create_gist(self, ctx: commands.Context, *, inp:Optional[str]=None):
+    async def create_gist(self, ctx: commands.Context, *, inp: Optional[str] = None):
         """
         Create gists from within discord
 
@@ -100,9 +100,15 @@ class Github(commands.Cog):
 
         res = await req.json()
         # TODO: Make this more verbose to the user and log errors
-        embed = Embed(title="Gist creation", description=res.get("html_url", "Something went wrong."))
+        embed = Embed(
+            title="Gist creation",
+            description=res.get("html_url", "Something went wrong."),
+        )
         embed.add_field(name="Files", value="\n".join(files.keys()), inline=False)
-        if skipped: embed.add_field(name="Skipped files", value="\n".join(skipped), inline=False)
+        if skipped:
+            embed.add_field(
+                name="Skipped files", value="\n".join(skipped), inline=False
+            )
         await ctx.send(embed=embed)
 
     @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])

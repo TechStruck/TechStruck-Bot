@@ -5,12 +5,14 @@ from discord.ext import commands
 
 files_pattern = re.compile(r"\s{0,}```\w{0,}\s{0,}")
 
+
 class NoValidFiles(commands.CommandError):
     def __str__(self):
         return "None of the files were valid or no files were given"
 
+
 async def process_files(
-        ctx: commands.Context, inp:str
+    ctx: commands.Context, inp: str
 ) -> Tuple[Dict[str, Dict[str, str]], List[str]]:
     files = {}
 
@@ -36,7 +38,9 @@ async def process_files(
         }
 
     for attachment in attachments:
-        if attachment.size > 16 * 1024 or attachment.filename.endswith(("jpg", "jpeg", "png")):
+        if attachment.size > 16 * 1024 or attachment.filename.endswith(
+            ("jpg", "jpeg", "png")
+        ):
             skipped.append(attachment.filename)
             continue
         try:
