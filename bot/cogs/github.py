@@ -64,12 +64,15 @@ class Github(commands.Cog):
                 ),
             }
         )
-        await ctx.author.send(
-            embed=Embed(
-                title="Connect Github",
-                description=f"Click [this]({url}) to link your github account. This link invalidates in 2 minutes",
+        try:
+            await ctx.author.send(
+                embed=Embed(
+                    title="Connect Github",
+                    description=f"Click [this]({url}) to link your github account. This link invalidates in 2 minutes",
+                )
             )
-        )
+        except discord.Forbidden:
+            await ctx.send("Your DMs (direct messages) are closed. Open them so I can send you a safe link to authorize your account.")
 
     @commands.command(name="creategist", aliases=["crgist"])
     async def create_gist(self, ctx: commands.Context, *, inp: Optional[str] = None):
