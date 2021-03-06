@@ -184,13 +184,16 @@ class Stackexchange(commands.Cog):
                 ),
             }
         )
-        await ctx.author.send(
-            embed=Embed(
-                title="Connect Stackexchange",
-                description=f"Click [this]({url}) to link your stackexchange account. This link invalidates in 2 minutes",
-                color=Color.blue(),
+        try:
+            await ctx.author.send(
+                embed=Embed(
+                    title="Connect Stackexchange",
+                    description=f"Click [this]({url}) to link your stackexchange account. This link invalidates in 2 minutes",
+                    color=Color.blue(),
+                )
             )
-        )
+        except discord.Forbidden:
+            await ctx.send("Your DMs (direct messages) are closed. Open them so I can send you a safe authorization link.")
 
 
 def setup(bot: commands.Bot):
