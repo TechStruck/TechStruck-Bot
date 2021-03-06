@@ -5,7 +5,7 @@ import os
 from urllib.parse import urlencode
 import traceback
 
-from discord import Color, Embed, Member
+from discord import Color, Embed, Member, Forbidden
 from discord.ext import commands, flags, tasks
 from jose import jwt
 from cachetools import TTLCache
@@ -184,13 +184,18 @@ class Stackexchange(commands.Cog):
                 ),
             }
         )
-        await ctx.author.send(
-            embed=Embed(
-                title="Connect Stackexchange",
-                description=f"Click [this]({url}) to link your stackexchange account. This link invalidates in 2 minutes",
-                color=Color.blue(),
+        try:
+            await ctx.author.send(
+                embed=Embed(
+                    title="Connect Stackexchange",
+                    description=f"Click [this]({url}) to link your stackexchange account. This link invalidates in 2 minutes",
+                    color=Color.blue(),
+                )
             )
-        )
+        except Forbidden:
+            await ctx.send(
+                "Your DMs (direct messages) are closed. Open them so I can send you a safe authorization link."
+            )
 
 
 def setup(bot: commands.Bot):

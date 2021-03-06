@@ -5,7 +5,7 @@ from io import BytesIO
 from urllib.parse import urlencode
 
 from cachetools import TTLCache
-from discord import Color, Embed, File, Member
+from discord import Color, Embed, File, Member, Forbidden
 from discord.ext import commands
 from jose import jwt
 from reportlab.graphics import renderPM
@@ -64,12 +64,17 @@ class Github(commands.Cog):
                 ),
             }
         )
-        await ctx.author.send(
-            embed=Embed(
-                title="Connect Github",
-                description=f"Click [this]({url}) to link your github account. This link invalidates in 2 minutes",
+        try:
+            await ctx.author.send(
+                embed=Embed(
+                    title="Connect Github",
+                    description=f"Click [this]({url}) to link your github account. This link invalidates in 2 minutes",
+                )
             )
-        )
+        except Forbidden:
+            await ctx.send(
+                "Your DMs are closed. Open them so I can send you the authorization link."
+            )
 
     @commands.command(name="creategist", aliases=["crgist"])
     async def create_gist(self, ctx: commands.Context, *, inp: Optional[str] = None):
