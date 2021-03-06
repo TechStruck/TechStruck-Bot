@@ -72,25 +72,23 @@ class Github(commands.Cog):
                 )
             )
         except discord.Forbidden:
-            await ctx.send("Your DMs (direct messages) are closed. Open them so I can send you a safe link to authorize your account.")
+            await ctx.send(
+                "Your DMs (direct messages) are closed. Open them so I can send you a safe link to authorize your account."
+            )
 
     @commands.command(name="creategist", aliases=["crgist"])
     async def create_gist(self, ctx: commands.Context, *, inp: Optional[str] = None):
         """
         Create gists from within discord
-
         Three ways to specify the files:
         -   Reply to a message with attachments
         -   Send attachments along with the command
         -   Use a filename and codeblock... format
-
         Example:
-
         filename.py
         ```
         # Codeblock with contents of filename.py
         ```
-
         filename2.txt
         ```
         Codeblock containing filename2.txt's contents
