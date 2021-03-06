@@ -193,7 +193,9 @@ class Stackexchange(commands.Cog):
                 )
             )
         except discord.Forbidden:
-            await ctx.send("Your DMs (direct messages) are closed. Open them so I can send you a safe authorization link.")
+            await ctx.send(
+                "Your DMs (direct messages) are closed. Open them so I can send you a safe authorization link."
+            )
 
 
 def setup(bot: commands.Bot):
