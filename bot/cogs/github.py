@@ -1,64 +1,184 @@
 import datetime
-from typing import Optional
-import re
-from io import BytesIO
+import json
+import html
+import os
 from urllib.parse import urlencode
+import traceback
 
-from cachetools import TTLCache
-from discord import Color, Embed, File, Member
-from discord.ext import commands
+from discord import Color, Embed, Member
+from discord.ext import commands, flags, tasks
 from jose import jwt
-from reportlab.graphics import renderPM
-from svglib.svglib import svg2rlg
+from cachetools import TTLCache
 
 from config.common import config
-from config.oauth import github_oauth_config
+from config.oauth import stack_oauth_config
 from models import UserModel
-from bot.utils.process_files import process_files
 
 
-class GithubNotLinkedError(commands.CommandError):
+search_result_template = "[View]({site[site_url]}/q/{q[question_id]})\u2800\u2800Score: {q[score]}\u2800\u2800Tags: {tags}"
+
+
+class StackExchangeNotLinkedError(commands.CommandError):
     def __str__(self):
-        return "Your github account hasn't been linked yet, please use the `linkgithub` command to do it"
+        return "Your stackexchange account hasn't been linked yet, please use the `linkstack` command to do it"
 
 
-class InvalidTheme(commands.CommandError):
-    def __str__(self):
-        return "Not a valid theme. List of all valid themes:- default, dark, radical, merko, gruvbox, tokyonight, onedark, cobalt, synthwave, highcontrast, dracula"
+class StackExchangeError(commands.CommandError):
+    pass
 
 
-class Github(commands.Cog):
+class Stackexchange(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split()
-        self.files_regex = re.compile(r"\s{0,}```\w{0,}\s{0,}")
+        self.ready = False
+        self.sites = None
         self.token_cache = TTLCache(maxsize=1000, ttl=600)
+        self.load_sites.start()
 
     @property
     def session(self):
-        return self.bot.http._HTTPClient__session  # type: ignore
+        return self.bot.http._HTTPClient__session
+
+    @tasks.loop(count=1)
+    async def load_sites(self):
+        if os.path.isfile("cache/stackexchange_sites.json"):
+            with open("cache/stackexchange_sites.json") as f:
+                self.sites = json.load(f)
+        else:
+            try:
+                data = await self.stack_request(
+                    None,
+                    "GET",
+                    "/sites",
+                    params={"pagesize": "500", "filter": "*Ids4-aWV*RW_UxCPr0D"},
+                )
+            except Exception:
+                return traceback.print_exc()
+            else:
+                self.sites = data["items"]
+                if not os.path.isdir("cache"):
+                    os.mkdir("cache")
+                with open("cache/stackexchange_sites.json", "w") as f:
+                    json.dump(self.sites, f)
+
+        self.ready = True
+
+    async def cog_check(self, ctx: commands.Context):
+        if not self.ready:
+            raise StackExchangeError("Stackexchange commands are not ready yet")
+        return True
 
     async def cog_before_invoke(self, ctx: commands.Context):
-        if ctx.command == self.link_github:
+        if ctx.command == self.link_stackoverflow:
             return
 
         token = self.token_cache.get(ctx.author.id)
         if not token:
             user = await UserModel.get_or_none(id=ctx.author.id)
-            if user is None or user.github_oauth_token is None:
-                raise GithubNotLinkedError()
-            token = user.github_oauth_token
-            self.token_cache[ctx.author.id] = token
-        ctx.gh_token = token  # type: ignore
+            if user is None or user.stackoverflow_oauth_token is None:
+                raise StackExchangeNotLinkedError()
 
-    @commands.command(name="linkgithub", aliases=["lngithub"])
-    async def link_github(self, ctx: commands.Context):
+            token = user.stackoverflow_oauth_token
+            self.token_cache[ctx.author.id] = token
+        ctx.stack_token = token  # type: ignore
+
+    @commands.command(
+        name="stackrep",
+        aliases=["stackreputation", "stackoverflowrep", "stackoverflowreputation"],
+    )
+    async def stack_reputation(self, ctx: commands.Context):
+        """Check your stackoverflow reputation"""
+        # TODO: Use a stackexchange filter here
+        # https://api.stackexchange.com/docs/filters
+        data = await self.stack_request(
+            ctx,
+            "GET",
+            "/me",
+            data={
+                "site": "stackoverflow",
+            },
+        )
+        await ctx.send(data["items"][0]["reputation"])
+
+    @flags.add_flag("--site", type=str, default="stackoverflow")
+    @flags.add_flag("--tagged", type=str, nargs="+", default=[])
+    @flags.add_flag("term", nargs="+")
+    @flags.command(name="stacksearch", aliases=["stackser"])
+    async def stackexchange_search(self, ctx: commands.Context, **kwargs):
+        """Search stackexchange for your question"""
+        term, sitename, tagged = (
+            " ".join(kwargs["term"]),
+            kwargs["site"],
+            kwargs["tagged"],
+        )
+
+        site = None
+        for s in self.sites:
+            if s["api_site_parameter"] == sitename:
+                site = s
+                break
+        if not site:
+            raise StackExchangeError(f"Invalid site {sitename} provided")
+
+        data = await self.stack_request(
+            ctx,
+            "GET",
+            "/search/excerpts",
+            data={
+                "site": sitename,
+                "sort": "relevance",
+                "q": term,
+                "tagged": ";".join(tagged),
+                "pagesize": 5,
+                "filter": "ld-5YXYGN1SK1e",
+            },
+        )
+        embed = Embed(title=f"{site['name']} search", color=Color.green())
+        embed.set_thumbnail(url=site["icon_url"])
+        if data["items"]:
+            for i, q in enumerate(data["items"], 1):
+                tags = "\u2800".join(["`" + t + "`" for t in q["tags"]])
+                embed.add_field(
+                    name=str(i) + " " + html.unescape(q["title"]),
+                    value=search_result_template.format(site=site, q=q, tags=tags),
+                    inline=False,
+                )
+        else:
+            embed.add_field(name="Oops", value="Couldn't find any results")
+        await ctx.send(embed=embed)
+
+    async def stack_request(
+        self,
+        ctx: commands.Context,
+        method: str,
+        endpoint: str,
+        params: dict = {},
+        data: dict = {},
+    ):
+        data.update(stack_oauth_config.dict())
+        if ctx:
+            data["access_token"] = (ctx.stack_token,)
+        res = await self.session.request(
+            method,
+            f"https://api.stackexchange.com/2.2{endpoint}",
+            params=params,
+            data=data,
+        )
+
+        data = await res.json()
+        if "error_message" in data:
+            raise StackExchangeError(data["error_message"])
+        return data
+
+    @commands.command(name="linkstack", aliases=["lnstack"])
+    async def link_stackoverflow(self, ctx: commands.Context):
+        """Link your stackoverflow account"""
         expiry = datetime.datetime.utcnow() + datetime.timedelta(seconds=120)
-        url = "https://github.com/login/oauth/authorize?" + urlencode(
+        url = "https://stackoverflow.com/oauth/?" + urlencode(
             {
-                "client_id": github_oauth_config.client_id,
-                "scope": "gist",
-                "redirect_uri": "https://tech-struck.vercel.app/oauth/github",
+                "client_id": stack_oauth_config.client_id,
+                "scope": "no_expiry",
+                "redirect_uri": "https://tech-struck.vercel.app/oauth/stackexchange",
                 "state": jwt.encode(
                     {"id": ctx.author.id, "expiry": str(expiry)}, config.secret
                 ),
@@ -67,165 +187,16 @@ class Github(commands.Cog):
         try:
             await ctx.author.send(
                 embed=Embed(
-                    title="Connect Github",
-                    description=f"Click [this]({url}) to link your github account. This link invalidates in 2 minutes",
+                    title="Connect Stackexchange",
+                    description=f"Click [this]({url}) to link your stackexchange account. This link invalidates in 2 minutes",
+                    color=Color.blue(),
                 )
             )
         except discord.Forbidden:
             await ctx.send(
-                "Your DMs (direct messages) are closed. Open them so I can send you a safe link to authorize your account."
+                "Your DMs (direct messages) are closed. Open them so I can send you a safe authorization link."
             )
-
-    @commands.command(name="creategist", aliases=["crgist"])
-    async def create_gist(self, ctx: commands.Context, *, inp: Optional[str] = None):
-        """
-        Create gists from within discord
-        Three ways to specify the files:
-        -   Reply to a message with attachments
-        -   Send attachments along with the command
-        -   Use a filename and codeblock... format
-        Example:
-        filename.py
-        ```
-        # Codeblock with contents of filename.py
-        ```
-        filename2.txt
-        ```
-        Codeblock containing filename2.txt's contents
-        ```
-        """
-
-        files, skipped = await process_files(ctx, inp)
-
-        req = await self.github_request(ctx, "POST", "/gists", json={"files": files})
-
-        res = await req.json()
-        # TODO: Make this more verbose to the user and log errors
-        embed = Embed(
-            title="Gist creation",
-            description=res.get("html_url", "Something went wrong."),
-        )
-        embed.add_field(name="Files", value="\n".join(files.keys()), inline=False)
-        if skipped:
-            embed.add_field(
-                name="Skipped files", value="\n".join(skipped), inline=False
-            )
-        await ctx.send(embed=embed)
-
-    @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
-    async def github_search(self, ctx: commands.Context, *, term: str):
-        # TODO: Docs
-
-        req = await self.github_request(
-            ctx, "GET", "/search/repositories", dict(q=term, per_page=5)
-        )
-
-        data = await req.json()
-        if not data["items"]:
-            return await ctx.send(
-                embed=Embed(
-                    title=f"Searched for {term}",
-                    color=Color.red(),
-                    description="No results found",
-                )
-            )
-
-        em = Embed(
-            title=f"Searched for {term}",
-            color=Color.green(),
-            description="\n\n".join(
-                [
-                    "[{0[owner][login]}/{0[name]}]({0[html_url]})\n{0[stargazers_count]:,} :star:\u2800{0[forks_count]} \u2387\u2800\n{1}".format(
-                        result, self.repo_desc_format(result)
-                    )
-                    for result in data["items"]
-                ]
-            ),
-        )
-
-        await ctx.send(embed=em)
-
-    @commands.command(name="githubstats", aliases=["ghstats", "ghst"])
-    async def github_stats(
-        self, ctx: commands.Context, username: str = None, theme="radical"
-    ):
-        theme = self.process_theme(theme)
-
-        url = "https://github-readme-stats.codestackr.vercel.app/api"
-
-        username = username or await self.get_gh_user(ctx)
-
-        file = await self.get_file_from_svg_url(
-            url,
-            params={
-                "username": username,
-                "show_icons": "true",
-                "hide_border": "true",
-                "theme": theme,
-            },
-            exclude=[b"A++", b"A+"],
-        )
-        await ctx.send(file=File(file, filename="stats.png"))
-
-    @commands.command(name="githublanguages", aliases=["ghlangs", "ghtoplangs"])
-    async def github_top_languages(
-        self, ctx: commands.Context, username: str = None, theme: str = "radical"
-    ):
-
-        username = username or await self.get_gh_user(ctx)
-        theme = self.process_theme(theme)
-        url = "https://github-readme-stats.codestackr.vercel.app/api/top-langs/"
-
-        file = await self.get_file_from_svg_url(
-            url, params={"username": username, "theme": theme}
-        )
-        await ctx.send(file=File(file, filename="langs.png"))
-
-    async def get_file_from_svg_url(
-        self, url: str, *, params={}, exclude=[], fmt="PNG"
-    ):
-        res = await (await self.session.get(url, params=params)).content.read()
-        for i in exclude:
-            res = res.replace(
-                i, b""
-            )  # removes everything that needs to be excluded (eg. the uncentered A+)
-        drawing = svg2rlg(BytesIO(res))
-        file = BytesIO(renderPM.drawToString(drawing, fmt=fmt))
-        return file
-
-    def process_theme(self, theme):
-        theme = theme.lower()
-        if theme not in self.themes:
-            raise InvalidTheme()
-        return theme
-
-    @staticmethod
-    def repo_desc_format(result):
-        description = result["description"]
-        if not description:
-            return ""
-        return description if len(description) < 100 else (description[:100] + "...")
-
-    def github_request(
-        self,
-        ctx: commands.Context,
-        req_type: str,
-        endpoint: str,
-        params: dict = None,
-        json: dict = None,
-    ):
-        return self.session.request(
-            req_type,
-            f"https://api.github.com{endpoint}",
-            params=params,
-            json=json,
-            headers={"Authorization": f"Bearer {ctx.gh_token}"},
-        )
-
-    async def get_gh_user(self, ctx: commands.Context):
-        response = await (await self.github_request(ctx, "GET", "/user")).json()
-        return response.get("login")
 
 
 def setup(bot: commands.Bot):
-    bot.add_cog(Github(bot))
+    bot.add_cog(Stackexchange(bot))
