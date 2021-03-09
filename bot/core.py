@@ -54,7 +54,7 @@ class Common(commands.Cog):
             return await ctx.send("Prefix too long, must be within 10 characters!")
         self.bot.prefix_cache[ctx.guild.id] = prefix
         await GuildModel.filter(id=ctx.guild.id).update(prefix=prefix)
-        await ctx.send("My prefix has been updated to `{prefix}`")
+        await ctx.send(f"My prefix has been updated to `{prefix}`")
 
     @commands.command()
     async def prefix(self, ctx: commands.Context):
