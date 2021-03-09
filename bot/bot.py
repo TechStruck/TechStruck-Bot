@@ -5,6 +5,7 @@ from typing import Iterable
 
 from discord import Color, Embed, Intents, Message
 from discord.ext import commands, tasks
+from discord.mentions import AllowedMentions
 from tortoise import Tortoise
 
 from models import GuildModel
@@ -12,7 +13,14 @@ from models import GuildModel
 
 class TechStruckBot(commands.Bot):
     def __init__(self, *, tortoise_config, load_extensions=True, loadjsk=True):
-        super().__init__(command_prefix=self.get_custom_prefix, intents=Intents.all())
+        allowed_mentions = AllowedMentions(
+            users=True, replied_user=True, roles=False, everyone=False
+        )
+        super().__init__(
+            command_prefix=self.get_custom_prefix,
+            intents=Intents.all(),
+            allowed_mentions=allowed_mentions,
+        )
         self.tortoise_config = tortoise_config
         self.db_connected = False
         self.prefix_cache = {}
@@ -29,6 +37,8 @@ class TechStruckBot(commands.Bot):
                     "bot.cogs.help_command",
                     "bot.cogs.code_exec",
                     "bot.cogs.fun",
+                    "bot.cogs.rtfm",
+                    "bot.cogs.joke",
                 )
             )
         if loadjsk:

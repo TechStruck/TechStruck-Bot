@@ -6,6 +6,11 @@ from discord import Embed, Color, Message, TextChannel, RawReactionActionEvent, 
 
 from models import JokeModel, UserModel
 
+joke_format = """**Setup**: {0.setup}\n
+**End**: {0.end}\n
+**Server**: {1.name} (`{1.id}`)\n
+**Username**: {2} (`{2.id}`)\n
+Joke ID: {0.id}"""
 
 class Joke(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -36,7 +41,7 @@ class Joke(commands.Cog):
         msg = await self.joke_entries_channel.send(
             embed=Embed(
                 title=f"Joke #{joke.id}",
-                description="**Setup**: {0.setup}\n\n**End**: {0.end}\n\n**Server**: {1.name} (`{1.id}`)\n\n**Username**: {2} (`{2.id}`)\n\nJoke ID: {0.id}".format(
+                description=joke_format.format(
                     joke, ctx.guild, ctx.author
                 ),
                 color=Color.dark_gold(),
@@ -78,7 +83,7 @@ class Joke(commands.Cog):
 
         embed = msg.embeds[0]
         if len(ups) > 3:
-            joke = await JokeModel.filter(id=int(embed.title[6:])).update(accepted=True)
+            await JokeModel.filter(id=int(embed.title[6:])).update(accepted=True)
             embed.color = Color.green()
             await msg.edit(embed=embed)
 

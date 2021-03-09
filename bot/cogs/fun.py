@@ -1,18 +1,21 @@
 import asyncio
 
-from discord import Color, Embed, Forbidden, Member
+from discord import Color, Embed, Forbidden, Member, utils
 from discord.ext import commands
+
+
+from bot.bot import TechStruckBot
 
 
 class Fun(commands.Cog):
     """Commands for fun and entertainment"""
 
-    def __init__(self, bot: commands.Cog):
+    def __init__(self, bot: TechStruckBot):
         self.bot = bot
 
     @commands.command()
     async def beer(
-        self, ctx, user: Member = None, *, reason: commands.clean_content = ""
+        self, ctx, user: Member = None, *, reason: commands.clean_content = None
     ):
         """Have virtual beer with your friends/fellow members"""
         if not user or user.id == ctx.author.id:
@@ -83,14 +86,16 @@ class Fun(commands.Cog):
                 if set(
                     m.id for m in await r.message.reactions[0].users().flatten()
                 ).issuperset(m.id for m in members):
-                    return await msg.edit(
-                        content=(
-                            ", ".join(m.display_name for m in members)
-                            + ", "
-                            + ctx.author.display_name
-                            + " enjoy a lovely beer together \U0001f37b"
+                    content = (
+                        ", ".join(
+                            utils.escape_mentions(m.display_name) for m in members
                         )
+                        + ", "
+                        + utils.escape_mentions(ctx.author.display_name)
+                        + " enjoy a lovely beer together \U0001f37b"
                     )
+
+                    return await msg.edit(content=content)
 
     @commands.command()
     async def beerparty(
@@ -109,7 +114,7 @@ class Fun(commands.Cog):
         await ctx.send(
             ", ".join(
                 [
-                    u.display_name
+                    utils.escape_mentions(u.display_name)
                     for u in users + ([] if ctx.author in users else [ctx.author])
                     if not u.bot
                 ]
@@ -118,5 +123,5 @@ class Fun(commands.Cog):
         )
 
 
-def setup(bot: commands.Bot):
+def setup(bot: TechStruckBot):
     bot.add_cog(Fun(bot))
