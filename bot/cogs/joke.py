@@ -1,5 +1,4 @@
 import asyncio
-import re
 
 from discord.ext import commands
 from discord import Embed, Color, Message, TextChannel, RawReactionActionEvent, utils
@@ -11,6 +10,7 @@ joke_format = """**Setup**: {0.setup}\n
 **Server**: {1.name} (`{1.id}`)\n
 **Username**: {2} (`{2.id}`)\n
 Joke ID: {0.id}"""
+
 
 class Joke(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -41,9 +41,7 @@ class Joke(commands.Cog):
         msg = await self.joke_entries_channel.send(
             embed=Embed(
                 title=f"Joke #{joke.id}",
-                description=joke_format.format(
-                    joke, ctx.guild, ctx.author
-                ),
+                description=joke_format.format(joke, ctx.guild, ctx.author),
                 color=Color.dark_gold(),
             )
         )

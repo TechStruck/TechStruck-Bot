@@ -23,7 +23,9 @@ class RTFM(commands.Cog):
         "aiosqlite": "https://aiosqlite.omnilib.dev/en/latest",
         "sqlalchemy": "https://docs.sqlalchemy.org/en/14",
         "matplotlib": "https://matplotlib.org/stable",
+        "seaborn": "https://seaborn.pydata.org",
         "pygame": "https://www.pygame.org/docs",
+        "simplejson": "https://simplejson.readthedocs.io/en/latest",
         "wikipedia": "https://wikipedia.readthedocs.io/en/latest",
     }
 
@@ -43,7 +45,9 @@ class RTFM(commands.Cog):
         ("aiosqlite", "sqlite", "sqlite3", "sqli"): "aiosqlite",
         ("sqlalchemy", "sql", "alchemy", "alchem"): "sqlalchemy",
         ("matplotlib", "mpl", "plt"): "matplotlib",
+        ("seaborn", "sea"): "seaborn",
         ("pygame", "pyg", "game"): "pygame",
+        ("simplejson", "sjson", "json"): "simplejson",
         ("wiki", "wikipedia"): "wikipedia",
     }
 
