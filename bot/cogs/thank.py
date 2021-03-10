@@ -15,7 +15,7 @@ delete_thank_message = """**Thanked**: <@!{0.thanked_id}>
 Confirmation required!"""
 
 thank_list_message = """`{0.time:%D %T}` ID:`{0.id}`
-From: <@!{0.thanker_id}> ({0.thanked_id})
+From: <@!{0.thanker_id}> ({0.thanker_id})
 Description: {0.description}\n"""
 
 
