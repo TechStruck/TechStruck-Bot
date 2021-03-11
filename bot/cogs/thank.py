@@ -81,6 +81,7 @@ class Thank(commands.Cog):
 
     @thank.command(name="leaderboard", aliases=["lb"])
     async def thank_leaderboard(self, ctx: commands.Context):
+        """View a leaderboard of top helpers in the current server"""
         await ctx.trigger_typing()
         lb = (
             await UserModel.annotate(
@@ -111,8 +112,8 @@ class Thank(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.has_guild_permissions(kick_members=True)
     @thank.command(name="delete")
+    @commands.has_guild_permissions(kick_members=True)
     async def delete_thank(self, ctx: commands.Context, thank_id: int):
         thank = await ThankModel.get_or_none(pk=thank_id, guild_id=ctx.guild.id)
         if not thank:
@@ -138,8 +139,8 @@ class Thank(commands.Cog):
             return await ctx.reply("Deleted.")
         return await ctx.reply("Cancelled.")
 
-    @commands.has_guild_permissions(kick_members=True)
     @thank.command(name="list")
+    @commands.has_guild_permissions(kick_members=True)
     async def list_thanks(self, ctx: commands.Context, member: Member):
         thanks = (
             await ThankModel.filter(thanked_id=member.id, guild_id=ctx.guild.id)
