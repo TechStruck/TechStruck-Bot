@@ -79,7 +79,7 @@ class RTFM(commands.Cog):
         ).parse_object_inv(url)
 
     @commands.group(invoke_without_command=True)
-    async def rtfm(self, ctx: commands.Context, doc: str = None, *, term: str = None):
+    async def rtfm(self, ctx: commands.Context, doc: str, *, term: str):
         doc = doc.lower()
         target = None
         for aliases, target_name in self.aliases.items():
