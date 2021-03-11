@@ -80,6 +80,10 @@ class RTFM(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     async def rtfm(self, ctx: commands.Context, doc: str, *, term: str):
+        """
+        Search through docs of a module/python
+        Args: target, term
+        """
         doc = doc.lower()
         target = None
         for aliases, target_name in self.aliases.items():
@@ -107,6 +111,7 @@ class RTFM(commands.Cog):
 
     @rtfm.command(name="list")
     async def list_targets(self, ctx: commands.Context):
+        """List all the avaliable documentation search targets"""
         aliases = {v: k for k, v in self.aliases.items()}
         embed = Embed(title="RTFM list of avaliable modules", color=Color.green())
         embed.description = "\n".join(
