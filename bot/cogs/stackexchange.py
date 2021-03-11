@@ -14,6 +14,7 @@ from cachetools import TTLCache
 from config.common import config
 from config.oauth import stack_oauth_config
 from models import UserModel
+from bot.utils import fuzzy
 
 
 search_result_template = "[View]({site[site_url]}/q/{q[question_id]})\u2800\u2800Score: {q[score]}\u2800\u2800Tags: {tags}"
@@ -158,6 +159,17 @@ class Stackexchange(commands.Cog):
                 )
         else:
             embed.add_field(name="Oops", value="Couldn't find any results")
+        await ctx.send(embed=embed)
+
+    @commands.command(aliases=["stacksites"])
+    async def stacksite(self, ctx: commands.Context, *, term: str):
+        """Search through list of stackexchange sites and find relevant ones"""
+        sites = fuzzy.finder(term, self.sites, key=lambda s: s["name"], lazy=False)[:5]  # type: ignore
+        embed = Embed(color=Color.blue())
+        description = "\n".join(
+            ["[`{0[name]}`]({0[site_url]})".format(site) for site in sites]
+        )
+        embed.description = description
         await ctx.send(embed=embed)
 
     def get_site(self, sitename: str):
