@@ -2,6 +2,7 @@ import datetime
 import json
 import html
 import os
+from typing import Optional
 from urllib.parse import urlencode
 import traceback
 
@@ -82,23 +83,41 @@ class Stackexchange(commands.Cog):
             self.token_cache[ctx.author.id] = token
         ctx.stack_token = token  # type: ignore
 
-    @commands.command(
-        name="stackrep",
-        aliases=["stackreputation", "stackoverflowrep", "stackoverflowreputation"],
+    @flags.add_flag("--site", type=str, default="stackoverflow")
+    @flags.command(
+        name="stackprofile",
+        aliases=["stackpro", "stackacc", "stackaccount"],
     )
-    async def stack_reputation(self, ctx: commands.Context):
+    async def stack_profile(self, ctx: commands.Context, **kwargs):
         """Check your stackoverflow reputation"""
         # TODO: Use a stackexchange filter here
         # https://api.stackexchange.com/docs/filters
+        site = self.get_site(kwargs["site"])
         data = await self.stack_request(
             ctx,
             "GET",
             "/me",
             data={
-                "site": "stackoverflow",
+                "site": site["api_site_parameter"],
             },
         )
-        await ctx.send(data["items"][0]["reputation"])
+        if not data["items"]:
+            return await ctx.send("You don't have an account in this site!")
+        profile = data["items"][0]
+        embed = Embed(title=site["name"] + " Profile", color=0x0077CC)
+
+        embed.add_field(name="Username", value=profile["display_name"], inline=False)
+        embed.add_field(name="Reputation", value=profile["reputation"], inline=False)
+        embed.add_field(
+            name="Badges",
+            value="\U0001f947 {0[gold]} \u2502 \U0001f948 {0[silver]} \u2502 \U0001f949 {0[bronze]}".format(
+                profile["badge_counts"]
+            ),
+            inline=False,
+        )
+
+        embed.set_thumbnail(url=profile["profile_image"])
+        await ctx.send(embed=embed)
 
     @flags.add_flag("--site", type=str, default="stackoverflow")
     @flags.add_flag("--tagged", type=str, nargs="+", default=[])
@@ -112,13 +131,7 @@ class Stackexchange(commands.Cog):
             kwargs["tagged"],
         )
 
-        site = None
-        for s in self.sites:
-            if s["api_site_parameter"] == sitename:
-                site = s
-                break
-        if not site:
-            raise StackExchangeError(f"Invalid site {sitename} provided")
+        site = self.get_site(sitename)
 
         data = await self.stack_request(
             ctx,
@@ -147,9 +160,16 @@ class Stackexchange(commands.Cog):
             embed.add_field(name="Oops", value="Couldn't find any results")
         await ctx.send(embed=embed)
 
+    def get_site(self, sitename: str):
+        sitename = sitename.lower()
+        for site in self.sites:
+            if site["api_site_parameter"] == sitename:
+                return site
+        raise StackExchangeError(f"Invalid site {sitename} provided")
+
     async def stack_request(
         self,
-        ctx: commands.Context,
+        ctx: Optional[commands.Context],
         method: str,
         endpoint: str,
         params: dict = {},
