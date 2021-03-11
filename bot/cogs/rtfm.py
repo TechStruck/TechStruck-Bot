@@ -55,7 +55,9 @@ class RTFM(commands.Cog):
         ("wiki", "wikipedia"): "wikipedia",
     }
 
-    url_overrides = {"tensorflow": "https://github.com/mr-ubik/tensorflow-intersphinx/raw/master/tf2_py_objects.inv"}
+    url_overrides = {
+        "tensorflow": "https://github.com/mr-ubik/tensorflow-intersphinx/raw/master/tf2_py_objects.inv"
+    }
 
     def __init__(self, bot: TechStruckBot) -> None:
         self.bot = bot
@@ -67,7 +69,9 @@ class RTFM(commands.Cog):
 
     async def build(self, target) -> None:
         url = self.targets[target]
-        req = await self.session.get(self.url_overrides.get(target, url + "/objects.inv"))
+        req = await self.session.get(
+            self.url_overrides.get(target, url + "/objects.inv")
+        )
         if req.status != 200:
             raise commands.CommandError("Failed to build RTFM cache")
         self.cache[target] = rtfm.SphinxObjectFileReader(
