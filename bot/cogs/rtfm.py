@@ -23,6 +23,7 @@ class RTFM(commands.Cog):
         "asyncpg": "https://magicstack.github.io/asyncpg/current",
         "aiosqlite": "https://aiosqlite.omnilib.dev/en/latest",
         "sqlalchemy": "https://docs.sqlalchemy.org/en/14",
+        "tensorflow": "https://www.tensorflow.org/api_docs/python",
         "matplotlib": "https://matplotlib.org/stable",
         "seaborn": "https://seaborn.pydata.org",
         "pygame": "https://www.pygame.org/docs",
@@ -46,12 +47,15 @@ class RTFM(commands.Cog):
         ("asyncpg", "pg"): "asyncpg",
         ("aiosqlite", "sqlite", "sqlite3", "sqli"): "aiosqlite",
         ("sqlalchemy", "sql", "alchemy", "alchem"): "sqlalchemy",
+        ("tensorflow", "tf"): "tensorflow",
         ("matplotlib", "mpl", "plt"): "matplotlib",
         ("seaborn", "sea"): "seaborn",
         ("pygame", "pyg", "game"): "pygame",
         ("simplejson", "sjson", "json"): "simplejson",
         ("wiki", "wikipedia"): "wikipedia",
     }
+
+    url_overrides = {"tensorflow": "https://github.com/mr-ubik/tensorflow-intersphinx/raw/master/tf2_py_objects.inv"}
 
     def __init__(self, bot: TechStruckBot) -> None:
         self.bot = bot
@@ -63,21 +67,18 @@ class RTFM(commands.Cog):
 
     async def build(self, target) -> None:
         url = self.targets[target]
-        req = await self.session.get(url + "/objects.inv")
+        req = await self.session.get(self.url_overrides.get(target, url + "/objects.inv"))
         if req.status != 200:
             raise commands.CommandError("Failed to build RTFM cache")
         self.cache[target] = rtfm.SphinxObjectFileReader(
             await req.read()
         ).parse_object_inv(url)
-        print(f"Built {target}")
 
     @commands.group(invoke_without_command=True)
     async def rtfm(self, ctx: commands.Context, doc: str = None, *, term: str = None):
-        print(doc, term)
         doc = doc.lower()
         target = None
         for aliases, target_name in self.aliases.items():
-            print(aliases, doc in target_name)
             if doc in aliases:
                 target = target_name
 
