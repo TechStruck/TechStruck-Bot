@@ -1,5 +1,7 @@
-from discord import Webhook, RequestsWebhookAdapter
 from typing import Optional
+
+from discord import RequestsWebhookAdapter, Webhook
+
 from .embed import yaml_file_to_message
 
 

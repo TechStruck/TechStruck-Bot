@@ -1,9 +1,9 @@
-from discord.ext import commands
-from discord import Color, Embed
 import aiohttp
-from bot.utils import rtfm, fuzzy
+from discord import Color, Embed
+from discord.ext import commands
 
 from bot.bot import TechStruckBot
+from bot.utils import fuzzy, rtfm
 
 
 class RTFM(commands.Cog):

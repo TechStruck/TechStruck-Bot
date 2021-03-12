@@ -8,8 +8,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 # help with: http://chairnerd.seatgeek.com/fuzzywuzzy-fuzzy-string-matching-in-python/
 
-import re
 import heapq
+import re
 from difflib import SequenceMatcher
 
 

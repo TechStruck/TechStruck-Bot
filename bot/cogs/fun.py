@@ -3,7 +3,6 @@ import asyncio
 from discord import Color, Embed, Forbidden, Member, utils
 from discord.ext import commands
 
-
 from bot.bot import TechStruckBot
 
 

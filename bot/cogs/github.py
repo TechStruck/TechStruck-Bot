@@ -1,20 +1,20 @@
 import datetime
-from typing import Optional
 import re
 from io import BytesIO
+from typing import Optional
 from urllib.parse import urlencode
 
 from cachetools import TTLCache
-from discord import Color, Embed, File, Member, Forbidden
+from discord import Color, Embed, File, Forbidden, Member
 from discord.ext import commands
 from jose import jwt
 from reportlab.graphics import renderPM
 from svglib.svglib import svg2rlg
 
+from bot.utils.process_files import process_files
 from config.common import config
 from config.oauth import github_oauth_config
 from models import UserModel
-from bot.utils.process_files import process_files
 
 
 class GithubNotLinkedError(commands.CommandError):

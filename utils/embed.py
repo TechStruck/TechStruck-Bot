@@ -1,6 +1,7 @@
 import datetime
+
 import yaml
-from discord import Embed, Color, File
+from discord import Color, Embed, File
 
 
 def build_embed(embed_data, add_timestamp=False):

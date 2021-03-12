@@ -2,7 +2,8 @@ import platform
 import sys
 
 import psutil
-from discord import Color, Embed, NotFound, __version__ as discord_version
+from discord import Color, Embed, NotFound
+from discord import __version__ as discord_version
 from discord.ext import commands
 
 from models import GuildModel

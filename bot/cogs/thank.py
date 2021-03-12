@@ -7,7 +7,6 @@ from tortoise.functions import Count, Q
 
 from models import ThankModel, UserModel
 
-
 delete_thank_message = """**Thanked**: <@!{0.thanked_id}>
 **Thanker**: <@!{0.thanker_id}>
 **Description**: {0.description}

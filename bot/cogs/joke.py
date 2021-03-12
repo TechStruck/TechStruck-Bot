@@ -1,7 +1,7 @@
 import asyncio
 
+from discord import Color, Embed, Message, RawReactionActionEvent, TextChannel, utils
 from discord.ext import commands
-from discord import Embed, Color, Message, TextChannel, RawReactionActionEvent, utils
 
 from models import JokeModel, UserModel
 

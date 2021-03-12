@@ -1,21 +1,20 @@
 import datetime
-import json
 import html
+import json
 import os
+import traceback
 from typing import Optional
 from urllib.parse import urlencode
-import traceback
 
-from discord import Color, Embed, Member, Forbidden
+from cachetools import TTLCache
+from discord import Color, Embed, Forbidden, Member
 from discord.ext import commands, flags, tasks
 from jose import jwt
-from cachetools import TTLCache
 
+from bot.utils import fuzzy
 from config.common import config
 from config.oauth import stack_oauth_config
 from models import UserModel
-from bot.utils import fuzzy
-
 
 search_result_template = "[View]({site[site_url]}/q/{q[question_id]})\u2800\u2800Score: {q[score]}\u2800\u2800Tags: {tags}"
 

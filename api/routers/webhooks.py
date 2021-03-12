@@ -4,9 +4,9 @@ import random
 from typing import List
 
 from aiohttp import ClientSession
-from praw import Reddit
-from discord import AsyncWebhookAdapter, RequestsWebhookAdapter, Color, Embed, Webhook
+from discord import AsyncWebhookAdapter, Color, Embed, RequestsWebhookAdapter, Webhook
 from fastapi import APIRouter, Depends
+from praw import Reddit
 
 from config.reddit import reddit_config
 from config.webhook import webhook_config
