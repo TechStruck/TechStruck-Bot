@@ -1,4 +1,7 @@
-import zlib, io, os, re
+import io
+import os
+import re
+import zlib
 
 # Directly taken and modified from Rapptz/RoboDanny
 # https://github.com/Rapptz/RoboDanny/blob/715a5cf8545b94d61823f62db484be4fac1c95b1/cogs/api.py
