@@ -38,7 +38,7 @@ async def process_files(
         }
 
     for attachment in attachments:
-        if attachment.size > 16 * 1024 or attachment.filename.endswith(
+        if attachment.size > 64 * 1024 or attachment.filename.endswith(
             ("jpg", "jpeg", "png")
         ):
             skipped.append(attachment.filename)
