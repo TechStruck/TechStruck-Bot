@@ -1,4 +1,8 @@
-from discord import Color, Embed, NotFound
+import platform
+import sys
+
+import psutil
+from discord import Color, Embed, NotFound, __version__ as discord_version
 from discord.ext import commands
 
 from models import GuildModel
@@ -25,8 +29,20 @@ class Common(commands.Cog):
         guilds = len(self.bot.guilds)
 
         embed = Embed(color=Color.dark_green())
-        embed.add_field(name="Guilds", value=str(guilds))
-        embed.add_field(name="Users", value=str(users))
+        fields = (
+            ("Guilds", guilds),
+            ("Users", users),
+            ("System", platform.release()),
+            (
+                "Memory",
+                "{:.4} MB".format(psutil.Process().memory_info().rss / 1024 ** 2),
+            ),
+            ("Python version", ".".join([str(v) for v in sys.version_info[:3]])),
+            ("Discord version", discord_version),
+        )
+        for name, value in fields:
+            embed.add_field(name=name, value=str(value), inline=False)
+
         embed.set_thumbnail(url=str(ctx.guild.me.avatar_url))
 
         await ctx.send(embed=embed)
