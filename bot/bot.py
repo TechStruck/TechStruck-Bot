@@ -20,6 +20,7 @@ class TechStruckBot(commands.Bot):
             command_prefix=self.get_custom_prefix,
             intents=Intents.all(),
             allowed_mentions=allowed_mentions,
+            description="A bot by and for developers to integrate several tools into one place.",
         )
         self.tortoise_config = tortoise_config
         self.db_connected = False
