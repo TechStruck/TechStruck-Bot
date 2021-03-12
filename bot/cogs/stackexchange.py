@@ -29,6 +29,8 @@ class StackExchangeError(commands.CommandError):
 
 
 class Stackexchange(commands.Cog):
+    """Commands related to the StackExchange network"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.ready = False

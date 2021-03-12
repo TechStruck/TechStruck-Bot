@@ -13,16 +13,20 @@ Joke ID: {0.id}"""
 
 
 class Joke(commands.Cog):
+    """Joke related commands"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.group(invoke_without_command=True)
     async def joke(self, ctx: commands.Context):
+        """Joke commands"""
         await ctx.send_help(self.joke)
 
     @joke.command()
     @commands.cooldown(1, 60, type=commands.BucketType.user)
     async def add(self, ctx: commands.Context):
+        """Submit a joke that can then get approved and part of the collection"""
         try:
             setup = await self._get_input(
                 ctx,

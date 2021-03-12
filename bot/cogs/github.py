@@ -28,6 +28,8 @@ class InvalidTheme(commands.CommandError):
 
 
 class Github(commands.Cog):
+    """Commands related to Github"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.themes = "default dark radical merko gruvbox tokyonight onedark cobalt synthwave highcontrast dracula".split()
@@ -53,6 +55,7 @@ class Github(commands.Cog):
 
     @commands.command(name="linkgithub", aliases=["lngithub"])
     async def link_github(self, ctx: commands.Context):
+        """Link your Github account through OAuth2 to gain access to Github related commands"""
         expiry = datetime.datetime.utcnow() + datetime.timedelta(seconds=120)
         url = "https://github.com/login/oauth/authorize?" + urlencode(
             {
@@ -118,6 +121,12 @@ class Github(commands.Cog):
 
     @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
     async def github_search(self, ctx: commands.Context, *, term: str):
+        """
+        Search through all public repositories in Github
+
+        Github search filters work here
+        eg `ghse user:FalseDev`
+        """
         # TODO: Docs
 
         req = await self.github_request(
@@ -153,6 +162,7 @@ class Github(commands.Cog):
     async def github_stats(
         self, ctx: commands.Context, username: str = None, theme="radical"
     ):
+        """View statistics about you/any Github user in various themes"""
         theme = self.process_theme(theme)
 
         url = "https://github-readme-stats.codestackr.vercel.app/api"
@@ -175,6 +185,7 @@ class Github(commands.Cog):
     async def github_top_languages(
         self, ctx: commands.Context, username: str = None, theme: str = "radical"
     ):
+        """View language usage statistics for you/any github user in various themes"""
 
         username = username or await self.get_gh_user(ctx)
         theme = self.process_theme(theme)

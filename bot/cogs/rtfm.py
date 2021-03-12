@@ -7,6 +7,8 @@ from bot.utils import fuzzy, rtfm
 
 
 class RTFM(commands.Cog):
+    """Search through manuals of several python modules and python itself"""
+
     targets = {
         "python": "https://docs.python.org/3",
         "discord.py": "https://discordpy.readthedocs.io/en/latest",
