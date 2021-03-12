@@ -55,6 +55,7 @@ class Fun(commands.Cog):
         *,
         reason: commands.clean_content = None,
     ):
+        """Invite a bunch of people to have beer"""
         if not members:
             return await ctx.send("You can't have beer with no other person!")
         for member in members:
@@ -100,6 +101,7 @@ class Fun(commands.Cog):
     async def beerparty(
         self, ctx: commands.Context, *, reason: commands.clean_content = None
     ):
+        """Openly allow anyone to join and enjoy in a beer party"""
         reason = ("\nReason:" + reason) if reason else ""
         msg = await ctx.send(f"Open invite to a beer party!{reason}")
         await msg.add_reaction("\U0001f37b")

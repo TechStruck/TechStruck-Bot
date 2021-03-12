@@ -114,6 +114,7 @@ class Thank(commands.Cog):
     @thank.command(name="delete")
     @commands.has_guild_permissions(kick_members=True)
     async def delete_thank(self, ctx: commands.Context, thank_id: int):
+        """Remove an invalid/fake thank record"""
         thank = await ThankModel.get_or_none(pk=thank_id, guild_id=ctx.guild.id)
         if not thank:
             return await ctx.send("Thank with given ID not found")
@@ -141,6 +142,7 @@ class Thank(commands.Cog):
     @thank.command(name="list")
     @commands.has_guild_permissions(kick_members=True)
     async def list_thanks(self, ctx: commands.Context, member: Member):
+        """List the most recent 10 thanks received by a user in the current server"""
         thanks = (
             await ThankModel.filter(thanked_id=member.id, guild_id=ctx.guild.id)
             .order_by("-time")

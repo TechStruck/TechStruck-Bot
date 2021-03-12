@@ -29,7 +29,9 @@ class HelpCommand(commands.HelpCommand):
             embed.description = description
 
         for cog, cmds in mapping.items():
-            name = "No Category" if cog is None else cog.qualified_name
+            if cog is None:
+                continue
+            name = cog.qualified_name
             filtered = await self.filter_commands(cmds, sort=True)
             if filtered:
                 value = "\u2002".join(f"`{c.name}`" for c in cmds)
