@@ -104,7 +104,7 @@ class RTFM(commands.Cog):
         await ctx.send(
             embed=Embed(
                 title=f"Searched for {term} in {target}",
-                description="\n".join([f"[{key}]({url})" for key, url in results]),
+                description="\n".join([f"[`{key}`]({url})" for key, url in results]),
                 color=Color.dark_purple(),
             )
         )
