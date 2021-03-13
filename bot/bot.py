@@ -25,7 +25,7 @@ class TechStruckBot(commands.Bot):
         self.tortoise_config = tortoise_config
         self.db_connected = False
         self.prefix_cache = {}
-        self.connect_db.start()
+        self.loop.create_task(self.create_db())
 
         if load_extensions:
             self.load_extensions(
@@ -45,7 +45,6 @@ class TechStruckBot(commands.Bot):
         if loadjsk:
             self.load_extension("jishaku")
 
-    @tasks.loop(seconds=0, count=1)
     async def connect_db(self):
         print("Connecting to db")
         await Tortoise.init(self.tortoise_config)
