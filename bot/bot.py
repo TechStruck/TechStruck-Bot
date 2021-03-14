@@ -40,6 +40,7 @@ class TechStruckBot(commands.Bot):
                     "bot.cogs.fun",
                     "bot.cogs.rtfm",
                     "bot.cogs.joke",
+                    "bot.cogs.utils",
                 )
             )
         if loadjsk:
