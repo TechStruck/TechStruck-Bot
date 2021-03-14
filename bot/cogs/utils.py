@@ -1,9 +1,8 @@
 from discord.channel import TextChannel
 from discord.ext import commands, flags
 
-from bot.utils.embed_flag_input import embed_input, dict_to_embed
-
 from bot.bot import TechStruckBot
+from bot.utils.embed_flag_input import dict_to_embed, embed_input
 
 
 class Utils(commands.Cog):
