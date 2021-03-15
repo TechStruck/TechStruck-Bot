@@ -1,7 +1,8 @@
 import datetime
 import json
 import random
-from typing import List
+from concurrent import futures
+from typing import Iterable, List
 
 from aiohttp import ClientSession
 from discord import AsyncWebhookAdapter, Color, Embed, RequestsWebhookAdapter, Webhook
@@ -33,21 +34,29 @@ SUBREDDITS = (
     "funny",
 )
 
+def send_meme(webhook: Webhook, subreddits:List[str]) -> bool:
+    meme_subreddit = reddit.subreddit(random.choice(subreddits))
+    meme = meme_subreddit.random()
+    if not any((meme.url.endswith(i) for i in REDDIT_ALLOWED_FORMATS)):
+        return False
+    embed = Embed(title=meme.title, color=Color.magenta())
+    embed.set_image(url=meme.url)
+    embed.set_footer(text=f"\U0001f44d {meme.ups} \u2502 \U0001f44e {meme.downs}")
+    webhook.send(embed=embed)
+    return True
 
-def send_memes(webhook: Webhook, subreddits: List[str], quantity: int):
+# The subreddits arg exists although theres a
+# global so that in the future it can be
+# modified for multiple channels/servers
+def send_memes(webhook: Webhook, subreddits: Iterable[str], quantity: int):
     sent = 0
     skipped = 0
-    while sent < quantity:
-        meme_subreddit = reddit.subreddit(random.choice(SUBREDDITS))
-        meme = meme_subreddit.random()
-        if not any((meme.url.endswith(i) for i in REDDIT_ALLOWED_FORMATS)):
-            skipped += 1
-            continue
-        embed = Embed(title=meme.title, color=Color.magenta())
-        embed.set_image(url=meme.url)
-        embed.set_footer(text=f"\U0001f44d {meme.ups} \u2502 \U0001f44e {meme.downs}")
-        webhook.send(embed=embed)
-        sent += 1
+    with futures.ThreadPoolExecutor() as tp:
+        while sent < quantity:
+            results = [tp.submit(send_meme, webhook, subreddits) for _ in range(quantity-sent)]
+            new_sent = sum([r.result() for r in results])
+            skipped += (quantity-sent) - new_sent
+            sent += new_sent
     return sent, skipped
 
 
