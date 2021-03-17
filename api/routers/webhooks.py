@@ -34,7 +34,8 @@ SUBREDDITS = (
     "funny",
 )
 
-def send_meme(webhook: Webhook, subreddits:List[str]) -> bool:
+
+def send_meme(webhook: Webhook, subreddits: List[str]) -> bool:
     meme_subreddit = reddit.subreddit(random.choice(subreddits))
     meme = meme_subreddit.random()
     if not any((meme.url.endswith(i) for i in REDDIT_ALLOWED_FORMATS)):
@@ -45,6 +46,7 @@ def send_meme(webhook: Webhook, subreddits:List[str]) -> bool:
     webhook.send(embed=embed)
     return True
 
+
 # The subreddits arg exists although theres a
 # global so that in the future it can be
 # modified for multiple channels/servers
@@ -53,9 +55,12 @@ def send_memes(webhook: Webhook, subreddits: Iterable[str], quantity: int):
     skipped = 0
     with futures.ThreadPoolExecutor() as tp:
         while sent < quantity:
-            results = [tp.submit(send_meme, webhook, subreddits) for _ in range(quantity-sent)]
+            results = [
+                tp.submit(send_meme, webhook, subreddits)
+                for _ in range(quantity - sent)
+            ]
             new_sent = sum([r.result() for r in results])
-            skipped += (quantity-sent) - new_sent
+            skipped += (quantity - sent) - new_sent
             sent += new_sent
     return sent, skipped
 
