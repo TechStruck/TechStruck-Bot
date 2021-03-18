@@ -1,21 +1,11 @@
-aerich==0.5.0; python_version > '3.6'
-aPRAW==0.6.8a0
 asyncpg==0.22.0
 backports-datetime-fromisoformat==1.0.0; python_version < '3.7'
-cachetools==4.2.1
-discord.py==1.6.0
-discord-flags==2.1.1
 fastapi==0.63.0
 Jinja2==2.11.3
-jishaku==1.20.0.220
 praw==7.2.0
-psutil==5.8.0
 python-dotenv==0.15.0
 python-jose==3.2.0
-PyYAML==5.4.1
-quizapi==0.1.0
 requests==2.25.1
-svglib==1.0.1
-tortoise-orm[asyncpg]==0.16.21; python_version > '3.6'
 async-exit-stack; python_version < '3.7'
 async-generator; python_version < '3.7'
+

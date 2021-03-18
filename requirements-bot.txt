@@ -1,0 +1,12 @@
+aerich==0.5.0
+cachetools==4.2.1
+discord.py==1.6.0
+discord-flags==2.1.1
+jishaku==1.20.0.220
+psutil==5.8.0
+python-dotenv==0.15.0
+python-jose==3.2.0
+PyYAML==5.4.1
+svglib==1.0.1
+tortoise-orm[asyncpg]==0.16.21
+
