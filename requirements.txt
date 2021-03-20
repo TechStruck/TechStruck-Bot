@@ -1,6 +1,6 @@
-aiohttp==3.7.3
 asyncpg==0.22.0
 backports-datetime-fromisoformat==1.0.0; python_version < '3.7'
+discord.py==1.6.0
 fastapi==0.63.0
 Jinja2==2.11.3
 praw==7.2.0
