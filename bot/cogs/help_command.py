@@ -81,7 +81,7 @@ class HelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     def add_support_server(self, embed):
-        return embed.add_field(name="Links", value=bot_links)
+        return embed.add_field(name="Links", value=bot_links, inline=False)
 
     async def send_command_help(self, command):
         embed = discord.Embed(title=command.qualified_name, colour=self.COLOUR)
