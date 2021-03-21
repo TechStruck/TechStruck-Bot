@@ -79,7 +79,12 @@ class Github(commands.Cog):
                 "Your DMs are closed. Open them so I can send you the authorization link."
             )
 
-    @commands.command(name="creategist", aliases=["crgist"])
+    @commands.group(name="gist", aliases=["gs"], invoke_without_command=True)
+    async def gist(self, ctx: commands.Context):
+        """Commands related to Github gists"""
+        await ctx.send_help(self.gist)
+
+    @gist.command(name="create", aliases=["cr"])
     async def create_gist(self, ctx: commands.Context, *, inp: Optional[str] = None):
         """
         Create gists from within discord
@@ -118,6 +123,40 @@ class Github(commands.Cog):
                 name="Skipped files", value="\n".join(skipped), inline=False
             )
         await ctx.send(embed=embed)
+
+    @gist.command(name="list", aliases=["ls"])
+    async def list_gist(self, ctx: commands.Context):
+        """
+        List 10 gists made by you
+        """
+        req = await self.github_request(ctx, "GET", "/gists")
+
+        gists = (await req.json())[:10]
+        embed = Embed(title="Your gists", color=Color.green())
+        description = "\n\n".join(
+            [
+                "`{0[id]}`\n[{name}]({0[html_url]})".format(
+                    gist, name=next(iter(gist["files"]))
+                )
+                for gist in gists
+            ]
+        )
+        embed.description = description
+        await ctx.send(embed=embed)
+
+    @gist.command("delete", aliases=["del", "rm", "remove"])
+    async def delete_gist(self, ctx: commands.Context, *, gist_id: str):
+        """
+        Delete a gist using its ID
+        You can get the ID from the list
+        """
+        req = await self.github_request(ctx, "DELETE", "/gists/{}".format(gist_id))
+        if req.status == 204:
+            return await ctx.send("Deleted")
+        if req.status == 404:
+            return await ctx.send("Not found")
+        if req.status == 403:
+            return await ctx.send("Forbidden")
 
     @commands.command(name="githubsearch", aliases=["ghsearch", "ghse"])
     async def github_search(self, ctx: commands.Context, *, term: str):
@@ -221,7 +260,7 @@ class Github(commands.Cog):
             return ""
         return description if len(description) < 100 else (description[:100] + "...")
 
-    def github_request(
+    async def github_request(
         self,
         ctx: commands.Context,
         req_type: str,
@@ -229,7 +268,7 @@ class Github(commands.Cog):
         params: dict = None,
         json: dict = None,
     ):
-        return self.session.request(
+        return await self.session.request(
             req_type,
             f"https://api.github.com{endpoint}",
             params=params,
