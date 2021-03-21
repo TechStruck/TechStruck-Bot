@@ -1,9 +1,10 @@
+import functools
 import re
-from typing import Dict, TypeVar, Union
+from typing import Dict, Iterable, TypeVar, Union
 from urllib import parse
 
 from discord import AllowedMentions, Embed, Member, User
-from discord.ext import commands, flags
+from discord.ext import commands, flags  # type: ignore
 
 _F = TypeVar(
     "_F",
@@ -61,43 +62,6 @@ def colortype(value: str):
 url_type = UrlValidator(https_only=True)
 
 
-_embed_field_flags = (
-    [
-        flags.add_flag(*flagname)
-        for flagname in (
-            # Basic
-            ("--title", "-t"),
-            ("--description", "-d"),
-            # Author
-            ("--authorname", "--aname", "-an"),
-            # Footer
-            ("--footertext", "-ft"),
-        )
-    ]
-    + [
-        flags.add_flag(*flagname, type=url_type)
-        for flagname in (
-            # Image parts
-            ("--thumbnail", "-th"),
-            ("--authorurl", "--aurl", "-au"),
-            ("--authoricon", "--aicon", "-ai"),
-            ("--footericon", "-fi"),
-            ("--image", "-i"),
-        )
-    ]
-    + [
-        flags.add_flag("--fields", "-f", nargs="+"),
-        flags.add_flag("--colour", "--color", "-c", type=colortype),
-        flags.add_flag("--autoauthor", "-aa", action="store_true", default=False),
-    ]
-)
-
-_allowed_mentions_flags = (
-    flags.add_flag("--everyonemention", "-em", default=False, action="store_true"),
-    flags.add_flag("--rolementions", "-rm", default=False, action="store_true"),
-    flags.add_flag("--usermentions", "-um", default=True, action="store_false"),
-)
-
 
 def process_message_mentions(message: str) -> str:
     if not message:
@@ -112,16 +76,71 @@ def process_message_mentions(message: str) -> str:
     return message
 
 
-def embed_input(func: _F) -> _F:
-    for flag in _embed_field_flags:
-        flag(func)
-    return func
+class FlagAdder:
+    def __init__(self, kwarg_map: Dict[str, Iterable], *, default_mode: bool = False):
+        self.kwarg_map = kwarg_map
+        self.default_mode = default_mode
+
+    def call(self, func: _F, **kwargs) -> _F:
+        if kwargs.pop("all", False):
+            for flags in self.kwarg_map.values():
+                self.apply(flags=flags, func=func)
+            return func
+        kwargs = {**{k: self.default_mode for k in self.kwarg_map.keys()}, **kwargs}
+        for k, v in kwargs.items():
+            if v:
+                self.apply(flags=self.kwarg_map[k], func=func)
+        return func
+
+    def __call__(self, func=None, **kwargs):
+        if func is None:
+            return functools.partial(self.call, **kwargs)
+        return self.call(func, **kwargs)
+
+    def apply(self, *, flags: Iterable, func: _F) -> _F:
+        for flag in flags:
+            flag(func)
+        return func
 
 
-def allowed_mentions_input(func: _F) -> _F:
-    for flag in _allowed_mentions_flags:
-        flag(func)
-    return func
+embed_input = FlagAdder(
+    {
+        "basic": (
+            flags.add_flag("--title", "-t"),
+            flags.add_flag("--description", "-d"),
+            flags.add_flag("--fields", "-f", nargs="+"),
+            flags.add_flag("--colour", "--color", "-c", type=colortype),
+        ),
+        "image": (
+            flags.add_flag("--thumbnail", "-th", type=url_type),
+            flags.add_flag("--image", "-i", type=url_type),
+        ),
+        "author": (
+            flags.add_flag("--authorname", "--aname", "-an"),
+            flags.add_flag("--autoauthor", "-aa", action="store_true", default=False),
+            flags.add_flag("--authorurl", "--aurl", "-au", type=url_type),
+            flags.add_flag("--authoricon", "--aicon", "-ai", type=url_type),
+        ),
+        "footer": (
+            flags.add_flag("--footericon", "-fi", type=url_type),
+            flags.add_flag("--footertext", "-ft"),
+        ),
+    }
+)
+
+
+allowed_mentions_input = FlagAdder(
+    {
+        "all": (
+            flags.add_flag(
+                "--everyonemention", "-em", default=False, action="store_true"
+            ),
+            flags.add_flag("--rolementions", "-rm", default=False, action="store_true"),
+            flags.add_flag("--usermentions", "-um", default=True, action="store_false"),
+        )
+    },
+    default_mode=True,
+)
 
 
 def dict_to_embed(data: Dict[str, str], author: Union[User, Member] = None):

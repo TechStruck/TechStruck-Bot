@@ -28,8 +28,8 @@ class Utils(commands.Cog):
     def __init__(self, bot: TechStruckBot):
         self.bot = bot
 
-    @embed_input
-    @allowed_mentions_input
+    @embed_input(all=True)
+    @allowed_mentions_input()
     @flags.add_flag("--channel", "--in", type=TextChannel, default=None)
     @flags.add_flag("--message", "--msg", "-m", default=None)
     @flags.add_flag("--edit", "-e", type=Message, default=None)
