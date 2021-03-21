@@ -132,19 +132,28 @@ class RTFM(commands.Cog):
     @flags.add_flag("aliases", nargs="+")
     @flags.add_flag("url")
     @flags.add_flag("name")
-    @flags.add_flag("--override","-o")
+    @flags.add_flag("--override", "-o")
     @rtfm.command(name="add", hidden=True, cls=flags.FlagCommand)
     @commands.is_owner()
-    async def add_target(self, ctx:commands.Context, **kwargs):
+    async def add_target(self, ctx: commands.Context, **kwargs):
         print(kwargs)
-        name, url, aliases, override = kwargs.pop("name"), kwargs.pop("url"), kwargs.pop("aliases"), kwargs.pop("override")
+        name, url, aliases, override = (
+            kwargs.pop("name"),
+            kwargs.pop("url"),
+            kwargs.pop("aliases"),
+            kwargs.pop("override"),
+        )
         print(name, url, aliases, override)
         self.targets[name] = url
         self.aliases[tuple(aliases)] = name
         if override:
             self.url_overrides[name] = override
 
-        await ctx.send("RTFM target {name} added with aliases {aliases}".format(name=name, aliases=aliases))
+        await ctx.send(
+            "RTFM target {name} added with aliases {aliases}".format(
+                name=name, aliases=aliases
+            )
+        )
 
 
 def setup(bot: TechStruckBot):

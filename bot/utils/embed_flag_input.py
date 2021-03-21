@@ -62,7 +62,6 @@ def colortype(value: str):
 url_type = UrlValidator(https_only=True)
 
 
-
 def process_message_mentions(message: str) -> str:
     if not message:
         return ""
