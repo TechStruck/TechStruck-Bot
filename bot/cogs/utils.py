@@ -38,8 +38,8 @@ class Utils(commands.Cog):
     @flags.command(
         brief="Send an embed with any fields, in any channel, with command line like arguments"
     )
-    @commands.has_guild_permissions(manage_guild=True, manage_channels=True)
-    @commands.bot_has_guild_permissions()
+    @commands.has_guild_permissions(administrator=True)
+    @commands.bot_has_permissions(manage_webhooks=True, embed_links=True)
     async def embed(self, ctx: commands.Context, **kwargs):
         """
         Send an embed and its fully customizable
