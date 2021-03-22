@@ -176,7 +176,7 @@ def dict_to_embed(data: Dict[str, str], author: Union[User, Member] = None):
         )
 
     for name, value in zip(fields[::2], fields[1::2]):
-        embed.add_field(name=name, value=value)
+        embed.add_field(name=name, value=value, inline=False)
 
     if embed.to_dict() == {"type": "rich"}:
         raise EmbeyEmbedError()
