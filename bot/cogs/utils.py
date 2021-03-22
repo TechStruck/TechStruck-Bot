@@ -11,6 +11,7 @@ from bot.utils.embed_flag_input import (
     dict_to_embed,
     embed_input,
     process_message_mentions,
+    webhook_input,
 )
 
 flags._converters.CONVERTERS["Message"] = commands.MessageConverter().convert
@@ -30,6 +31,7 @@ class Utils(commands.Cog):
 
     @embed_input(all=True)
     @allowed_mentions_input()
+    @webhook_input()
     @flags.add_flag("--channel", "--in", type=TextChannel, default=None)
     @flags.add_flag("--message", "--msg", "-m", default=None)
     @flags.add_flag("--edit", "-e", type=Message, default=None)
@@ -49,6 +51,45 @@ class Utils(commands.Cog):
         embed = dict_to_embed(kwargs, author=ctx.author)
         allowed_mentions = dict_to_allowed_mentions(kwargs)
         message = process_message_mentions(kwargs.pop("message"))
+
+        if kwargs.pop("webhook"):
+            if (edit_message := kwargs.pop("edit")) :
+                edit_message.close()
+            username, avatar_url = kwargs.pop("webhook_username"), kwargs.pop(
+                "webhook_avatar"
+            )
+            if kwargs.pop("webhook_auto_author"):
+                username, avatar_url = (
+                    username or ctx.author.display_name,
+                    avatar_url or ctx.author.avatar_url,
+                )
+            target = kwargs.pop("channel") or ctx.channel
+            if (name := kwargs.pop("webhook_new_name")) :
+                wh = await target.create_webhook(name=name)
+            elif (name := kwargs.pop("webhook_name")) :
+                try:
+                    wh = next(
+                        filter(
+                            lambda wh: wh.name.casefold() == name.casefold(),
+                            await target.webhooks(),
+                        )
+                    )
+                except StopIteration:
+                    return await ctx.send(
+                        "No pre existing webhook found with given name"
+                    )
+            else:
+                return await ctx.send("No valid webhook identifiers provided")
+            await wh.send(
+                message,
+                embed=embed,
+                allowed_mentions=allowed_mentions,
+                username=username,
+                avatar_url=avatar_url,
+            )
+            if kwargs.pop("webhook_dispose"):
+                await wh.delete()
+            return await ctx.message.add_reaction("\u2705")
 
         if (edit := await maybe_await(kwargs.pop("edit"))) :
             if edit.author != ctx.guild.me:

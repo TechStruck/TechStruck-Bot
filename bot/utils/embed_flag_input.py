@@ -115,14 +115,14 @@ embed_input = FlagAdder(
             flags.add_flag("--image", "-i", type=url_type),
         ),
         "author": (
-            flags.add_flag("--authorname", "--aname", "-an"),
-            flags.add_flag("--autoauthor", "-aa", action="store_true", default=False),
-            flags.add_flag("--authorurl", "--aurl", "-au", type=url_type),
-            flags.add_flag("--authoricon", "--aicon", "-ai", type=url_type),
+            flags.add_flag("--author-name", "--aname", "-an"),
+            flags.add_flag("--auto-author", "-aa", action="store_true", default=False),
+            flags.add_flag("--author-url", "--aurl", "-au", type=url_type),
+            flags.add_flag("--author-icon", "--aicon", "-ai", type=url_type),
         ),
         "footer": (
-            flags.add_flag("--footericon", "-fi", type=url_type),
-            flags.add_flag("--footertext", "-ft"),
+            flags.add_flag("--footer-icon", "-fi", type=url_type),
+            flags.add_flag("--footer-text", "-ft"),
         ),
     }
 )
@@ -132,10 +132,33 @@ allowed_mentions_input = FlagAdder(
     {
         "all": (
             flags.add_flag(
-                "--everyonemention", "-em", default=False, action="store_true"
+                "--everyone-mention", "-em", default=False, action="store_true"
             ),
-            flags.add_flag("--rolementions", "-rm", default=False, action="store_true"),
-            flags.add_flag("--usermentions", "-um", default=True, action="store_false"),
+            flags.add_flag(
+                "--role-mentions", "-rm", default=False, action="store_true"
+            ),
+            flags.add_flag(
+                "--user-mentions", "-um", default=True, action="store_false"
+            ),
+        )
+    },
+    default_mode=True,
+)
+
+webhook_input = FlagAdder(
+    {
+        "all": (
+            flags.add_flag("--webhook", "-w", action="store_true", default=False),
+            flags.add_flag("--webhook-username", "-wun", type=str, default=None),
+            flags.add_flag("--webhook-avatar", "-wav", type=url_type, default=None),
+            flags.add_flag(
+                "--webhook-auto-author", "-waa", action="store_true", default=False
+            ),
+            flags.add_flag("--webhook-new-name", "-wnn", type=str, default=None),
+            flags.add_flag("--webhook-name", "-wn", type=str, default=None),
+            flags.add_flag(
+                "--webhook-dispose", "-wd", action="store_true", default=False
+            ),
         )
     },
     default_mode=True,
@@ -151,23 +174,23 @@ def dict_to_embed(data: Dict[str, str], author: Union[User, Member] = None):
         if (value := data.pop(field, None)) :
             getattr(embed, "set_" + field)(url=value)
 
-    if data.pop("autoauthor") and author:
+    if data.pop("auto_author") and author:
         embed.set_author(name=author.display_name, icon_url=str(author.avatar_url))
-    if "authorname" in data and data["authorname"]:
+    if "author_name" in data and data["author_name"]:
         kwargs = {}
-        if (icon_url := data.pop("authoricon", None)) :
+        if (icon_url := data.pop("author_icon", None)) :
             kwargs["icon_url"] = icon_url
-        if (author_url := data.pop("authorurl", None)) :
+        if (author_url := data.pop("author_url", None)) :
             kwargs["url"] = author_url
 
-        embed.set_author(name=data.pop("authorname"), **kwargs)
+        embed.set_author(name=data.pop("author_name"), **kwargs)
 
-    if "footertext" in data and data["footertext"]:
+    if "footer_text" in data and data["footer_text"]:
         kwargs = {}
-        if (footer_icon := data.pop("footericon", None)) :
+        if (footer_icon := data.pop("footer_icon", None)) :
             kwargs["icon_url"] = footer_icon
 
-        embed.set_footer(text=data.pop("footertext"), **kwargs)
+        embed.set_footer(text=data.pop("footer_text"), **kwargs)
 
     fields = data.pop("fields") or []
     if len(fields) % 2 == 1:
@@ -186,7 +209,7 @@ def dict_to_embed(data: Dict[str, str], author: Union[User, Member] = None):
 
 def dict_to_allowed_mentions(data):
     return AllowedMentions(
-        everyone=data.pop("everyonemention"),
-        roles=data.pop("rolementions"),
-        users=data.pop("usermentions"),
+        everyone=data.pop("everyone_mention"),
+        roles=data.pop("role_mentions"),
+        users=data.pop("user_mentions"),
     )
