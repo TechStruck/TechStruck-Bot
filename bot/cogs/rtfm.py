@@ -1,3 +1,5 @@
+import warnings
+
 import aiohttp
 from discord import Color, Embed
 from discord.ext import commands, flags
@@ -75,6 +77,11 @@ class RTFM(commands.Cog):
             self.url_overrides.get(target, url + "/objects.inv")
         )
         if req.status != 200:
+            warnings.warn(
+                Warning(
+                    f"Received response with status code {req.status} when trying to build RTFM cache for {target} through {url}/objects.inv"
+                )
+            )
             raise commands.CommandError("Failed to build RTFM cache")
         self.cache[target] = rtfm.SphinxObjectFileReader(
             await req.read()
