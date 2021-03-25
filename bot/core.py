@@ -5,6 +5,7 @@ import psutil
 from discord import Color, Embed, NotFound
 from discord import __version__ as discord_version
 from discord.ext import commands
+from sqlalchemy import update
 
 from models import GuildModel
 
@@ -70,7 +71,12 @@ class Common(commands.Cog):
         if len(prefix) > 10:
             return await ctx.send("Prefix too long, must be within 10 characters!")
         self.bot.prefix_cache[ctx.guild.id] = prefix
-        await GuildModel.filter(id=ctx.guild.id).update(prefix=prefix)
+        await self.bot.db_session.execute(
+            update(GuildModel)
+            .where(GuildModel.id == ctx.guild.id)
+            .values(prefix=prefix)
+        )
+        await self.bot.db_session.commit()
         await ctx.send(f"My prefix has been updated to `{prefix}`")
 
     @commands.command()
