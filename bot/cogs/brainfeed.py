@@ -3,10 +3,16 @@ from datetime import datetime
 from functools import cached_property
 
 from discord import Embed, Member, NotFound, Reaction, TextChannel
-from discord.ext import commands, flags
+from discord.ext import commands, flags  # type: ignore
+from discord.utils import get
 
 from bot.bot import TechStruckBot
 from bot.utils.embed_flag_input import dict_to_embed, embed_input
+
+
+class UnknownBrainfeed(commands.CommandError):
+    def __str__(self) -> str:
+        return "The BrainFeed with the requested ID was not found"
 
 
 class BrainFeed(commands.Cog):
@@ -65,18 +71,49 @@ class BrainFeed(commands.Cog):
         await submission.reply(embed=metaembed)
         await ctx.send(f"Submitted\nSubmission ID: {submission.id}")
 
+    async def get_submission(self, bf_id) -> Embed:
+        try:
+            msg = await self.submission_channel.fetch_message(bf_id)
+        except NotFound:
+            raise UnknownBrainfeed()
+
+        if not msg.embeds:
+            raise UnknownBrainfeed()
+
+        return msg.embeds[0]
+
     @brainfeed.command()
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def view(self, ctx: commands.Context, id: int):
-        try:
-            msg = await self.submission_channel.fetch_message(id)
-        except NotFound:
-            return await ctx.send("Unknown brainfeed")
-
-        if not msg.embeds:
-            return await ctx.send("Unknown brainfeed")
-        embed = msg.embeds[0]
+        embed = await self.get_submission(id)
         await ctx.send(embed=embed)
+
+    @flags.add_flag("--in", "-i", type=TextChannel, default=None)
+    @flags.add_flag("--webhook", "-wh", action="store_true", default=False)
+    @flags.add_flag("--webhook-name", "-wn", default="BrainFeed")
+    @flags.add_flag("--webhook-dispose", "-wd", action="store_true", default=False)
+    @brainfeed.command(cls=flags.FlagCommand)
+    @commands.has_guild_permissions(administrator=True)
+    @commands.bot_has_guild_permissions(manage_webhooks=True, embed_links=True)
+    async def send(self, ctx: commands.Context, bf_id: int, **kwargs):
+        channel: TextChannel = ctx.channel  # type: ignore
+        if (in_ := kwargs.pop("in")) :
+            channel = await in_
+
+        embed = await self.get_submission(bf_id)
+
+        if not kwargs.pop("webhook"):
+            return await channel.send(embed=embed)
+
+        wh_name: str = kwargs.pop("webhook_name")
+
+        webhook = get(
+            await channel.webhooks(), name=wh_name
+        ) or await channel.create_webhook(name=wh_name)
+
+        await webhook.send(embed=embed)
+        if kwargs.pop("webhook_dispose"):
+            await webhook.delete()
 
     @brainfeed.command(hidden=True)
     async def approve(self, ctx: commands.Context, *, id: int):
