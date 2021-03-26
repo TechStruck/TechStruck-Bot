@@ -24,6 +24,7 @@ class BrainFeed(commands.Cog):
 
     @flags.group(aliases=["bf", "brain", "feed"], invoke_without_command=True)
     async def brainfeed(self, ctx: commands.Context):
+        """BrainFeed - the daily dose of knowledge"""
         await ctx.send_help(self.brainfeed)  # type: ignore
 
     @cached_property
@@ -35,6 +36,7 @@ class BrainFeed(commands.Cog):
     @commands.guild_only()
     @commands.max_concurrency(1, per=commands.BucketType.user)
     async def add(self, ctx: commands.Context, **kwargs):
+        """Submit your brainfeed for approval and publishing"""
         embed = dict_to_embed(kwargs)
         embed.set_author(name=ctx.author.name, icon_url=str(ctx.author.avatar_url))
         embed.timestamp = datetime.now()
@@ -85,6 +87,7 @@ class BrainFeed(commands.Cog):
     @brainfeed.command(aliases=["show"])
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def view(self, ctx: commands.Context, id: int):
+        """View a BrainFeed"""
         embed = await self.get_submission(id)
         await ctx.send(embed=embed)
 
@@ -96,6 +99,7 @@ class BrainFeed(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, embed_links=True)
     async def send(self, ctx: commands.Context, bf_id: int, **kwargs):
+        """Publish a BrainFeed in your server"""
         channel: TextChannel = ctx.channel  # type: ignore
         if (in_ := kwargs.pop("in")) :
             channel = await in_
