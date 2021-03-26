@@ -31,7 +31,7 @@ class BrainFeed(commands.Cog):
         return self.bot.get_channel(self.submission_channel_id)  # type: ignore
 
     @embed_input(basic=True, image=True)
-    @brainfeed.command(cls=flags.FlagCommand)
+    @brainfeed.command(aliases=["new", "submit"], cls=flags.FlagCommand)
     @commands.guild_only()
     @commands.max_concurrency(1, per=commands.BucketType.user)
     async def add(self, ctx: commands.Context, **kwargs):
@@ -82,7 +82,7 @@ class BrainFeed(commands.Cog):
 
         return msg.embeds[0]
 
-    @brainfeed.command()
+    @brainfeed.command(aliases=["show"])
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def view(self, ctx: commands.Context, id: int):
         embed = await self.get_submission(id)
@@ -92,7 +92,7 @@ class BrainFeed(commands.Cog):
     @flags.add_flag("--webhook", "-wh", action="store_true", default=False)
     @flags.add_flag("--webhook-name", "-wn", default="BrainFeed")
     @flags.add_flag("--webhook-dispose", "-wd", action="store_true", default=False)
-    @brainfeed.command(cls=flags.FlagCommand)
+    @brainfeed.command(aliases=["post"], cls=flags.FlagCommand)
     @commands.has_guild_permissions(administrator=True)
     @commands.bot_has_guild_permissions(manage_webhooks=True, embed_links=True)
     async def send(self, ctx: commands.Context, bf_id: int, **kwargs):
@@ -116,6 +116,7 @@ class BrainFeed(commands.Cog):
             await webhook.delete()
 
     @brainfeed.command(hidden=True)
+    @commands.is_owner()
     async def approve(self, ctx: commands.Context, *, id: int):
         try:
             msg = await self.submission_channel.fetch_message(id)
@@ -127,6 +128,7 @@ class BrainFeed(commands.Cog):
             await ctx.send("Approved")
 
     @brainfeed.command(hidden=True)
+    @commands.is_owner()
     async def deny(self, ctx: commands.Context, *, id: int):
         try:
             msg = await self.submission_channel.fetch_message(id)

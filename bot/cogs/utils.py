@@ -1,7 +1,7 @@
 import re
 import sys
 
-from discord import Message, TextChannel
+from discord import Embed, Message, TextChannel
 from discord.ext import commands, flags
 
 from bot.bot import TechStruckBot
@@ -103,6 +103,20 @@ class Utils(commands.Cog):
             target = kwargs.pop("channel") or ctx
             await target.send(message, embed=embed, allowed_mentions=allowed_mentions)
         await ctx.message.add_reaction("\u2705")
+
+    @commands.command()
+    async def rawembed(self, ctx: commands.Context):
+        ref = ctx.message.reference
+        if not ref or not ref.message_id:
+            return await ctx.send("Reply to an message with an embed")
+        message = ref.cached_message or await ctx.channel.fetch_message(ref.message_id)
+
+        if not message.embeds:
+            return await ctx.send("Message had no embeds")
+        em = message.embeds[0]
+        description = "```" + str(em.to_dict()) + "```"
+        embed = Embed(description=description)
+        await ctx.reply(embed=embed)
 
 
 def setup(bot: TechStruckBot):
