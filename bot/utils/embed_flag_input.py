@@ -174,7 +174,7 @@ def dict_to_embed(data: Dict[str, str], author: Union[User, Member] = None):
         if (value := data.pop(field, None)) :
             getattr(embed, "set_" + field)(url=value)
 
-    if data.pop("auto_author") and author:
+    if data.pop("auto_author", False) and author:
         embed.set_author(name=author.display_name, icon_url=str(author.avatar_url))
     if "author_name" in data and data["author_name"]:
         kwargs = {}
@@ -192,7 +192,7 @@ def dict_to_embed(data: Dict[str, str], author: Union[User, Member] = None):
 
         embed.set_footer(text=data.pop("footer_text"), **kwargs)
 
-    fields = data.pop("fields") or []
+    fields = data.pop("fields", []) or []
     if len(fields) % 2 == 1:
         raise InvalidFieldArgs(
             "Number of arguments for fields must be an even number, pairs of name and value"
