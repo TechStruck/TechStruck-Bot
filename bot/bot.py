@@ -5,6 +5,7 @@ from typing import Iterable
 
 from discord import Color, Embed, Intents, Message
 from discord.ext import commands, tasks
+from discord.http import HTTPClient
 from discord.mentions import AllowedMentions
 from tortoise import Tortoise
 
@@ -12,6 +13,8 @@ from models import GuildModel
 
 
 class TechStruckBot(commands.Bot):
+    http: HTTPClient
+
     def __init__(self, *, tortoise_config, load_extensions=True, loadjsk=True):
         allowed_mentions = AllowedMentions(
             users=True, replied_user=True, roles=False, everyone=False
@@ -41,6 +44,7 @@ class TechStruckBot(commands.Bot):
                     "bot.cogs.rtfm",
                     "bot.cogs.joke",
                     "bot.cogs.utils",
+                    "bot.cogs.brainfeed",
                 )
             )
         if loadjsk:
