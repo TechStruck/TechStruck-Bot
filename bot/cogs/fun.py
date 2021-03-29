@@ -103,7 +103,7 @@ class Fun(commands.Cog):
     ):
         """Openly allow anyone to join and enjoy in a beer party"""
         reason = ("\nReason:" + reason) if reason else ""
-        msg = await ctx.send(f"Open invite to a beer party!{reason}")
+        msg = await ctx.send(f"Open invite to a beer party! {reason}")
         await msg.add_reaction("\U0001f37b")
         await asyncio.sleep(20)
         users = (
