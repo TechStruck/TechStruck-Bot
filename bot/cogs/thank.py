@@ -25,6 +25,7 @@ class Thank(commands.Cog):
         self.bot = bot
 
     @commands.group(invoke_without_command=True)
+    @commands.cooldown(5, 300, commands.BucketType.user)
     async def thank(self, ctx: commands.Context, recv: Member, *, description: str):
         """Thank someone for their help with a description to show gratitude"""
         if recv.id == ctx.author.id:
