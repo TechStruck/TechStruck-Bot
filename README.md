@@ -1,6 +1,6 @@
-<h1 align="center">
+<p align="center">
 	<img src="https://cdn.discordapp.com/attachments/770679803635433473/825250084589273118/circle-cropped4.png" height="125px" width="125px" />
-</h1>
+</p>
 
 <h1 align="center">Techstruck</h1>
 
@@ -22,6 +22,6 @@
 </ol>
 
 <h3><img src="https://cdn.discordapp.com/attachments/770679803635433473/825245805476184074/675395743044993053.png" height="20px"> • I found a bug!</h3>
-- Please open an issue or even send a pull request with the fix to help up keet the bot and other bug free!
+<ul><li>Please open an issue or even send a pull request with the fix to help up keet the bot and other bug free!</li></ul>
 
 <h3 align="center"><a href="https://discord.gg/jhK3bpNkRH"><img src="https://www.freepnglogos.com/uploads/discord-logo-png/discord-logo-logodownload-download-logotipos-1.png" height="20px"></a> <a href="https://discord.gg/jhK3bpNkRH">Click me to join Tech Struck</a></h3>
