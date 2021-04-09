@@ -109,21 +109,14 @@ class RTFM(commands.Cog):
             cache = self.cache.get(target)
 
         results = fuzzy.finder(term, list(cache.items()), key=lambda x: x[0], lazy=False)[:8]  # type: ignore
-        
-        embed=Embed(
+
+        await ctx.send(
+            embed=Embed(
                 title=f"Searched for {term} in {target}",
                 description="\n".join([f"[`{key}`]({url})" for key, url in results]),
                 color=Color.dark_purple(),
             )
-        
-        cmd_msg = ctx.message
-        if cmd_msg.reference is not None:
-            msg_id = cmd_msg.reference.message_id
-            msg = await ctx.channel.fetch_message(msg_id)
-            await msg.reply(embed=embed)
-        
-        else:
-            await ctx.send(embed=embed)
+        )
 
     @rtfm.command(name="list")
     async def list_targets(self, ctx: commands.Context):
