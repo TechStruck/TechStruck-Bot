@@ -117,7 +117,7 @@ class RTFM(commands.Cog):
             )
         
         cmd_msg = ctx.message
-        if cmd_msg is not None:
+        if cmd_msg.reference is not None:
             msg_id = cmd_msg.reference.message_id
             msg = await ctx.channel.fetch_message(msg_id)
             await msg.reply(embed=embed)
