@@ -4,7 +4,7 @@ discord.py==1.6.0
 fastapi==0.63.0
 Jinja2==2.11.3
 praw==7.2.0
-python-dotenv==0.16.0
+python-dotenv==0.17.0
 python-jose==3.2.0
 requests==2.25.1
 async-exit-stack; python_version < '3.7'
