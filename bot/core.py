@@ -82,6 +82,15 @@ class Common(commands.Cog):
             + "`"
         )
 
+    @commands.command()
+    async def invite(self, ctx: commands.Context):
+        embed = Embed(
+            title="Invite me!",
+            description="[Click here](https://discord.com/api/oauth2/authorize?client_id=790474885804982293&permissions=0&scope=bot%20applications.commands) to add me to your server with no extra role!",
+            color=Color.green(),
+        )
+        await ctx.send(embed=embed)
+
 
 def setup(bot: TechStruckBot):
     bot.add_cog(Common(bot))
