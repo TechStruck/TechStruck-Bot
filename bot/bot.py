@@ -3,12 +3,21 @@ import re
 import traceback
 from typing import Iterable
 
-from discord import Color, Embed, Intents, Message
+from aiohttp import ClientSession
+from discord import (
+    AllowedMentions,
+    AsyncWebhookAdapter,
+    Color,
+    Embed,
+    Intents,
+    Message,
+    Webhook,
+)
 from discord.ext import commands, tasks
 from discord.http import HTTPClient
-from discord.mentions import AllowedMentions
 from tortoise import Tortoise
 
+from config.bot import bot_config
 from models import GuildModel
 
 
@@ -50,6 +59,10 @@ class TechStruckBot(commands.Bot):
         if loadjsk:
             self.load_extension("jishaku")
 
+    @property
+    def session(self) -> ClientSession:
+        return self.http._HTTPClient__session  # type: ignore
+
     @tasks.loop(seconds=0, count=1)
     async def connect_db(self):
         print("Connecting to db")
@@ -77,8 +90,31 @@ class TechStruckBot(commands.Bot):
         if isinstance(error, commands.CommandNotFound):
             return
         if isinstance(error, commands.CommandInvokeError):
-            await super().on_command_error(ctx, error)
-            await ctx.send("Oopsy, something's broken")
+            embed = Embed(
+                title="Error",
+                description="An unknown error has occurred and my developer has been notified of it.",
+                color=Color.red(),
+            )
+            await ctx.send(embed=embed)
+
+            traceback_text = "".join(
+                traceback.format_exception(type(error), error, error.__traceback__)
+            )
+            traceback_embed = Embed(
+                title="Traceback",
+                description=("```py\n" + traceback_text + "\n```"),
+                color=Color.red(),
+            )
+            message_embed = Embed(
+                title="Command",
+                description="```\n" + ctx.message.content + "\n```",
+                color=Color.red(),
+            )
+
+            wh = Webhook.from_url(
+                bot_config.log_webhook, adapter=AsyncWebhookAdapter(self.session)
+            )
+            return await wh.send(embeds=[traceback_embed, message_embed])
         title = " ".join(re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__))
         await ctx.send(
             embed=Embed(title=title, description=str(error), color=Color.red())
