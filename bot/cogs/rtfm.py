@@ -100,7 +100,7 @@ class RTFM(commands.Cog):
                 target = target_name
 
         if not target:
-            return await ctx.send("Alias/target not found")
+            return await ctx.reply("Alias/target not found")
 
         cache = self.cache.get(target)
         if not cache:
@@ -110,9 +110,12 @@ class RTFM(commands.Cog):
 
         results = fuzzy.finder(term, list(cache.items()), key=lambda x: x[0], lazy=False)[:8]  # type: ignore
 
-        await ctx.send(
+        if not results:
+            return await ctx.reply("Couldn't find any results")
+
+        await ctx.reply(
             embed=Embed(
-                title=f"Searched for {term} in {target}",
+                title=f"Searched in {target}",
                 description="\n".join([f"[`{key}`]({url})" for key, url in results]),
                 color=Color.dark_purple(),
             )
