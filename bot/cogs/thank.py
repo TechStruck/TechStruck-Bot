@@ -28,6 +28,11 @@ class Thank(commands.Cog):
     @commands.cooldown(5, 300, commands.BucketType.user)
     async def thank(self, ctx: commands.Context, recv: Member, *, description: str):
         """Thank someone for their help with a description to show gratitude"""
+        des_len = len(description)
+        if des_len < 5 or des_len > 100:
+            return await ctx.send(
+                f"Thank description must be between 5 and 100 characters, yours was {des_len}"
+            )
         if recv.id == ctx.author.id:
             return await ctx.send(
                 embed=Embed(
