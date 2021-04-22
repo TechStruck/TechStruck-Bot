@@ -99,7 +99,7 @@ class TechStruckBot(commands.Bot):
 
             traceback_text = "".join(
                 traceback.format_exception(type(error), error, error.__traceback__)
-            )
+            )[:2000]
             traceback_embed = Embed(
                 title="Traceback",
                 description=("```py\n" + traceback_text + "\n```"),
