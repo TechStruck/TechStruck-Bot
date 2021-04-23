@@ -1,4 +1,6 @@
 import asyncio
+import contextlib
+import math
 import re
 import traceback
 from typing import Iterable
@@ -9,9 +11,13 @@ from discord import (
     AsyncWebhookAdapter,
     Color,
     Embed,
+    Forbidden,
     Intents,
     Message,
+    NotFound,
+    TextChannel,
     Webhook,
+    utils,
 )
 from discord.ext import commands, tasks
 from discord.http import HTTPClient
@@ -95,36 +101,91 @@ class TechStruckBot(commands.Bot):
     ):
         if isinstance(error, commands.CommandNotFound):
             return
-        if isinstance(error, commands.CommandInvokeError):
-            embed = Embed(
-                title="Error",
-                description="An unknown error has occurred and my developer has been notified of it.",
-                color=Color.red(),
+        if not isinstance(error, commands.CommandInvokeError):
+            title = " ".join(
+                re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__)
             )
+            return await ctx.send(
+                embed=Embed(title=title, description=str(error), color=Color.red())
+            )
+
+        # If we've reached here, the error wasn't expected
+        # Report to logs
+        embed = Embed(
+            title="Error",
+            description="An unknown error has occurred and my developer has been notified of it.",
+            color=Color.red(),
+        )
+        with contextlib.suppress(NotFound, Forbidden):
             await ctx.send(embed=embed)
 
-            traceback_text = "".join(
-                traceback.format_exception(type(error), error, error.__traceback__)
-            )[:2000]
-            traceback_embed = Embed(
-                title="Traceback",
-                description=("```py\n" + traceback_text + "\n```"),
-                color=Color.red(),
-            )
-            message_embed = Embed(
-                title="Command",
-                description="```\n" + ctx.message.content + "\n```",
-                color=Color.red(),
-            )
-
-            wh = Webhook.from_url(
-                bot_config.log_webhook, adapter=AsyncWebhookAdapter(self.session)
-            )
-            return await wh.send(embeds=[traceback_embed, message_embed])
-        title = " ".join(re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__))
-        await ctx.send(
-            embed=Embed(title=title, description=str(error), color=Color.red())
+        traceback_text = "".join(
+            traceback.format_exception(type(error), error, error.__traceback__)
         )
+
+        length = len(traceback_text)
+        chunks = math.ceil(length / 1990)
+
+        traceback_texts = [
+            traceback_text[l * 1990 : (l + 1) * 1990] for l in range(chunks)
+        ]
+        traceback_embeds = [
+            Embed(
+                title="Traceback",
+                description=("```py\n" + text + "\n```"),
+                color=Color.red(),
+            )
+            for text in traceback_texts
+        ]
+
+        # Add message content
+        info_embed = Embed(
+            title="Message content",
+            description="```\n" + utils.escape_markdown(ctx.message.content) + "\n```",
+            color=Color.red(),
+        )
+        # Guild information
+        value = (
+            (
+                "**Name**: {0.name}\n"
+                "**ID**: {0.id}\n"
+                "**Created**: {0.created_at}\n"
+                "**Joined**: {0.me.joined_at}\n"
+                "**Member count**: {0.member_count}\n"
+                "**Permission integer**: {0.me.guild_permissions.value}"
+            ).format(ctx.guild)
+            if ctx.guild
+            else "None"
+        )
+
+        info_embed.add_field(name="Guild", value=value)
+        # Channel information
+        if isinstance(ctx.channel, TextChannel):
+            value = (
+                "**Type**: TextChannel\n"
+                "**Name**: {0.name}\n"
+                "**ID**: {0.id}\n"
+                "**Created**: {0.created_at}\n"
+                "**Permission integer**: {1}\n"
+            ).format(ctx.channel, ctx.channel.permissions_for(ctx.guild.me).value)
+        else:
+            value = (
+                "**Type**: DM\n" "**ID**: {0.id}\n" "**Created**: {0.created_at}\n"
+            ).format(ctx.channel)
+
+        info_embed.add_field(name="Channel", value=value)
+
+        # User info
+        value = (
+            "**Name**: {0}\n" "**ID**: {0.id}\n" "**Created**: {0.created_at}\n"
+        ).format(ctx.author)
+
+        info_embed.add_field(name="User", value=value)
+
+        wh = Webhook.from_url(
+            bot_config.log_webhook, adapter=AsyncWebhookAdapter(self.session)
+        )
+        return await wh.send(embeds=[*traceback_embeds, info_embed])
 
     async def get_custom_prefix(self, _, message: Message) -> str:
         prefix = await self.fetch_prefix(message)
