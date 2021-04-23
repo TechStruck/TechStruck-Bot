@@ -33,6 +33,7 @@ class TechStruckBot(commands.Bot):
             intents=Intents.all(),
             allowed_mentions=allowed_mentions,
             description="A bot by and for developers to integrate several tools into one place.",
+            strip_after_prefix=True,
         )
         self.tortoise_config = tortoise_config
         self.db_connected = False
@@ -120,7 +121,20 @@ class TechStruckBot(commands.Bot):
             embed=Embed(title=title, description=str(error), color=Color.red())
         )
 
-    async def get_custom_prefix(self, _, message: Message):
+    async def get_custom_prefix(self, _, message: Message) -> str:
+        prefix = await self.fetch_prefix(message)
+        bot_id = self.user.id
+        prefixes = [prefix, f"<@{bot_id}> ", f"<@!{bot_id}> "]
+
+        comp = re.compile(
+            "^(" + "|".join(re.escape(p) for p in prefixes) + ").*", flags=re.I
+        )
+        match = comp.match(message.content)
+        if match is not None:
+            return match.group(1)
+        return prefix
+
+    async def fetch_prefix(self, message: Message) -> str:
         # DMs/Group
         if not message.guild:
             return "."
