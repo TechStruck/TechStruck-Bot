@@ -83,6 +83,11 @@ class TechStruckBot(commands.Bot):
             return
         while not self.db_connected:
             await asyncio.sleep(0.2)
+        user_id = self.user.id
+        if msg.content in (f"<@{user_id}>", f"<@!{user_id}>"):
+            return await msg.reply(
+                "My prefix here is `{}`".format(await self.fetch_prefix(msg))
+            )
         await self.process_commands(msg)
 
     async def on_command_error(
