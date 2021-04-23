@@ -2,6 +2,8 @@
 	<img src="https://cdn.discordapp.com/attachments/770679803635433473/825250084589273118/circle-cropped4.png" height="125px" width="125px" />
 </p>
 
+<p align='center'><a href = "https://discord.gg/HXqXKdVBhs" target = "_blank"><img src = "https://discord.com/api/guilds/782517843820412948/embed.png"></a></p>
+
 <h1 align="center">Techstruck</h1>
 
 <h3><img src="https://cdn.discordapp.com/emojis/562008110412201986.png" height="20px"> • Info</h3>
