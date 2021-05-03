@@ -30,7 +30,7 @@ class CodeExec(commands.Cog):
 
     @property
     def session(self):
-        return self.bot.http._HTTPClient__session
+        return self.bot.http._HTTPClient__session  # type: ignore
 
     async def _run_code(self, *, lang: str, code: str):
         res = await self.session.post(
@@ -85,7 +85,7 @@ class CodeExec(commands.Cog):
         #            url = await create_guest_paste_bin(self.session, output)
         #            return await ctx.reply("Your output was too long, so here's the pastebin link " + url)
         embed = Embed(title=f"Ran your {result['language']} code", color=Color.green())
-        output = output[:500]
+        output = output[:500].strip()
         shortened = len(output) > 500
         lines = output.splitlines()
         shortened = shortened or (len(lines) > 15)
