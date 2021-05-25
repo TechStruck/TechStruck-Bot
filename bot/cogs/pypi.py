@@ -1,75 +1,72 @@
-import discord
-from discord import Embed, Color
-from discord.ext import commands
 from aiohttp import ContentTypeError
+from discord import Color, Embed
+from discord.ext.commands import Cog, Context, command
 
-class PyPi(commands.Cog):
+from ..bot import TechStruckBot
+
+
+class PyPi(Cog):
     """Commands related to Package Search"""
 
-    def __init__(self, bot: commands.Bot):
-        
+    def __init__(self, bot: TechStruckBot):
         self.bot = bot
 
     @property
     def session(self):
-        return self.bot.http._HTTPClient__session
+        return self.bot.session
 
     async def get_package(self, arg: str):
+        return await self.session.get(url=f"https://pypi.org/pypi/{arg}/json")
 
-        return await self.session.get(
-            url = f"https://pypi.org/pypi/{arg}/json"
-        )
-
-    @commands.command(aliases = ['pypi', 'package', 'packageinfo'])
-    async def pypisearch(self, ctx: commands.Context, arg: str):
-        """Get info about a Python package direct from PyPi"""
+    @command(aliases=["pypi", "package", "packageinfo"])
+    async def pypisearch(self, ctx: Context, arg: str):
+        """Get info about a Python package directly from PyPi"""
 
         res_raw = await self.get_package(arg)
-        
+
         try:
-            
             res_json = await res_raw.json()
-        
         except ContentTypeError:
-            
             return await ctx.send(
-                embed = Embed(
-                    description = "No such package found in the search query.", 
-                    color = Color.blurple()
+                embed=Embed(
+                    description="No such package found in the search query.",
+                    color=Color.blurple(),
                 )
             )
-        
+
         res = res_json["info"]
 
-        name = res["name"] or "Unknown"
-        author = res["author"] or "Unknown"
-        author_email = res["author_email"] or "Unknown"
+        def getval(key):
+            return res[key] or "Unknown"
 
-        description = res["summary"] or "Unknown"
-        home_page = res["home_page"] or "Unknown"
-        
-        project_url = res["project_url"] or "Unknown"
-        version = res["version"] or "Unknown"
-        _license = res["license"] or "Unknown"
+        name = getval("name")
+        author = getval("author")
+        author_email = getval("author_email")
+
+        description = getval("summary")
+        home_page = getval("home_page")
+
+        project_url = getval("project_url")
+        version = getval("version")
+        _license = getval("license")
 
         embed = Embed(
-            title = f"{name} PyPi Stats", 
-            description = description, 
-            color = Color.teal()
-            )
-        
-        embed.add_field(name = "Author", value = author, inline = True)
-        embed.add_field(name = "Author Email", value = author_email, inline = True)
+            title=f"{name} PyPi Stats", description=description, color=Color.teal()
+        )
 
-        embed.add_field(name = "Version", value = version, inline = False)
-        embed.add_field(name = "License", value = _license, inline = True)
+        embed.add_field(name="Author", value=author, inline=True)
+        embed.add_field(name="Author Email", value=author_email, inline=True)
 
-        embed.add_field(name = "Project Url", value = project_url, inline = False)
-        embed.add_field(name = "Home Page", value = home_page)
+        embed.add_field(name="Version", value=version, inline=False)
+        embed.add_field(name="License", value=_license, inline=True)
 
-        embed.set_thumbnail(url = "https://i.imgur.com/syDydkb.png")
+        embed.add_field(name="Project Url", value=project_url, inline=False)
+        embed.add_field(name="Home Page", value=home_page)
 
-        await ctx.send(embed = embed)
+        embed.set_thumbnail(url="https://i.imgur.com/syDydkb.png")
 
-def setup(bot: commands.Bot):
+        await ctx.send(embed=embed)
+
+
+def setup(bot: TechStruckBot):
     bot.add_cog(PyPi(bot))

@@ -59,6 +59,7 @@ class TechStruckBot(commands.Bot):
                     "bot.cogs.fun",
                     "bot.cogs.rtfm",
                     "bot.cogs.joke",
+                    "bot.cogs.pypi",
                     "bot.cogs.utils",
                     "bot.cogs.brainfeed",
                 )
