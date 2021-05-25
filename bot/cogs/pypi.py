@@ -4,6 +4,7 @@ from discord.ext import commands
 from aiohttp import ContentTypeError
 
 class PyPi(commands.Cog):
+    """Commands related to Package Search"""
 
     def __init__(self, bot: commands.Bot):
         
@@ -19,8 +20,9 @@ class PyPi(commands.Cog):
             url = f"https://pypi.org/pypi/{arg}/json"
         )
 
-    @commands.command(aliases = ['pypi', 'package'])
+    @commands.command(aliases = ['pypi', 'package', 'packageinfo'])
     async def pypisearch(self, ctx: commands.Context, arg: str):
+        """Get info about a Python package direct from PyPi"""
 
         res_raw = await self.get_package(arg)
         
@@ -39,16 +41,16 @@ class PyPi(commands.Cog):
         
         res = res_json["info"]
 
-        name = res["name"] or None
-        author = res["author"] or None
-        author_email = res["author_email"] or None
+        name = res["name"] or "Unknown"
+        author = res["author"] or "Unknown"
+        author_email = res["author_email"] or "Unknown"
 
-        description = res["summary"] or None
-        home_page = res["home_page"] or None
+        description = res["summary"] or "Unknown"
+        home_page = res["home_page"] or "Unknown"
         
-        project_url = res["project_url"] or None
-        version = res["version"] or None
-        _license = res["license"] or None
+        project_url = res["project_url"] or "Unknown"
+        version = res["version"] or "Unknown"
+        _license = res["license"] or "Unknown"
 
         embed = Embed(
             title = f"{name} PyPi Stats", 
