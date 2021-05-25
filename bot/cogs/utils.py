@@ -53,7 +53,7 @@ class Utils(commands.Cog):
         message = process_message_mentions(kwargs.pop("message"))
 
         if kwargs.pop("webhook"):
-            if (edit_message := kwargs.pop("edit")) :
+            if edit_message := kwargs.pop("edit"):
                 edit_message.close()
             username, avatar_url = kwargs.pop("webhook_username"), kwargs.pop(
                 "webhook_avatar"
@@ -64,9 +64,9 @@ class Utils(commands.Cog):
                     avatar_url or ctx.author.avatar_url,
                 )
             target = kwargs.pop("channel") or ctx.channel
-            if (name := kwargs.pop("webhook_new_name")) :
+            if name := kwargs.pop("webhook_new_name"):
                 wh = await target.create_webhook(name=name)
-            elif (name := kwargs.pop("webhook_name")) :
+            elif name := kwargs.pop("webhook_name"):
                 try:
                     wh = next(
                         filter(
@@ -91,7 +91,7 @@ class Utils(commands.Cog):
                 await wh.delete()
             return await ctx.message.add_reaction("\u2705")
 
-        if (edit := await maybe_await(kwargs.pop("edit"))) :
+        if edit := await maybe_await(kwargs.pop("edit")):
             if edit.author != ctx.guild.me:
                 return await ctx.send(
                     f"The target message wasn't sent by me! It was sent by {edit.author}"

@@ -101,7 +101,7 @@ class BrainFeed(commands.Cog):
     async def send(self, ctx: commands.Context, bf_id: int, **kwargs):
         """Publish a BrainFeed in your server"""
         channel: TextChannel = ctx.channel  # type: ignore
-        if (in_ := kwargs.pop("in")) :
+        if in_ := kwargs.pop("in"):
             channel = await in_
 
         embed = await self.get_submission(bf_id)

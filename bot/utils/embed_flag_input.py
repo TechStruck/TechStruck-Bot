@@ -168,26 +168,26 @@ webhook_input = FlagAdder(
 def dict_to_embed(data: Dict[str, str], author: Union[User, Member] = None):
     embed = Embed()
     for field in ("title", "description", "colour"):
-        if (value := data.pop(field, None)) :
+        if value := data.pop(field, None):
             setattr(embed, field, value)
     for field in "thumbnail", "image":
-        if (value := data.pop(field, None)) :
+        if value := data.pop(field, None):
             getattr(embed, "set_" + field)(url=value)
 
     if data.pop("auto_author", False) and author:
         embed.set_author(name=author.display_name, icon_url=str(author.avatar_url))
     if "author_name" in data and data["author_name"]:
         kwargs = {}
-        if (icon_url := data.pop("author_icon", None)) :
+        if icon_url := data.pop("author_icon", None):
             kwargs["icon_url"] = icon_url
-        if (author_url := data.pop("author_url", None)) :
+        if author_url := data.pop("author_url", None):
             kwargs["url"] = author_url
 
         embed.set_author(name=data.pop("author_name"), **kwargs)
 
     if "footer_text" in data and data["footer_text"]:
         kwargs = {}
-        if (footer_icon := data.pop("footer_icon", None)) :
+        if footer_icon := data.pop("footer_icon", None):
             kwargs["icon_url"] = footer_icon
 
         embed.set_footer(text=data.pop("footer_text"), **kwargs)

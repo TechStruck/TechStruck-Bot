@@ -22,3 +22,7 @@ def main():
     filename = "backup-{:%d-%m-%y-%H:%M}.pickle".format(datetime.now())
     with open(filename, "wb") as f:
         pickle.dump(data, f)
+
+
+if __name__ == "__main__":
+    main()
