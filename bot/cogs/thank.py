@@ -24,7 +24,7 @@ class Thank(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=True, aliases = ['thanks', 'rep'])
+    @commands.group(invoke_without_command=True, aliases=["thanks","rep"])
     @commands.cooldown(5, 300, commands.BucketType.user)
     async def thank(self, ctx: commands.Context, recv: Member, *, description: str):
         """Thank someone for their help with a description to show gratitude"""
