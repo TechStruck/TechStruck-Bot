@@ -6,7 +6,7 @@ from ..bot import TechStruckBot
 
 
 class PyPi(Cog):
-    """Commands related to Package Search"""
+    """Commands related to Python Package Search"""
 
     def __init__(self, bot: TechStruckBot):
         self.bot = bot
@@ -18,7 +18,7 @@ class PyPi(Cog):
     async def get_package(self, arg: str):
         return await self.session.get(url=f"https://pypi.org/pypi/{arg}/json")
 
-    @command(aliases=["pypi", "package", "packageinfo"])
+    @command(aliases=["pypi"])
     async def pypisearch(self, ctx: Context, arg: str):
         """Get info about a Python package directly from PyPi"""
 
