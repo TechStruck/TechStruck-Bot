@@ -27,10 +27,10 @@ class Crate(Cog):
 
         if res_json.get("errors"):
             return await ctx.send(
-              embed=discord.Embed(
-                  description="No such package found in the search query.", 
-                  color=0xe03d29
-              )
+                embed=Embed(
+                    description="No such package found in the search query.",
+                    color=0xE03D29,
+                )
             )
         main_info = res_json["crate"]
         latest_info = res_json["versions"][0]
@@ -41,7 +41,6 @@ class Crate(Cog):
         def getversionvals(*keys):
             keys = list(keys)
             val = latest_info.get(keys.pop(0)) or {}
-
 
             if keys:
                 for i in keys:
@@ -60,12 +59,11 @@ class Crate(Cog):
         latest_version = getversionvals("num")
         repository = getmainval("repository")
 
-
         homepage = getmainval("homepage")
         _license = getversionvals("license")
 
         em = Embed(
-            title=f"{pkg_name} crates.io Stats", description=description, color=0xe03d29
+            title=f"{pkg_name} crates.io Stats", description=description, color=0xE03D29
         )
 
         em.add_field(name="Published By", value=publisher, inline=True)
@@ -78,11 +76,11 @@ class Crate(Cog):
         em.add_field(name="Homepage", value=homepage, inline=True)
 
         em.set_thumbnail(
-          url="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Rust_programming_language_black_logo.svg/2048px-Rust_programming_language_black_logo.svg.png"
+            url="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Rust_programming_language_black_logo.svg/2048px-Rust_programming_language_black_logo.svg.png"
         )
 
         await ctx.send(embed=em)
 
 
 def setup(bot: TechStruckBot):
-    bot.add_cog(NPM(bot))
+    bot.add_cog(Crate(bot))
