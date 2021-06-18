@@ -63,6 +63,7 @@ class TechStruckBot(commands.Bot):
                     "bot.cogs.pypi",
                     "bot.cogs.utils",
                     "bot.cogs.brainfeed",
+                    "bot.cogs.cratesio"
                 )
             )
         if loadjsk:
