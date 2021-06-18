@@ -44,7 +44,7 @@ class NPM(Cog):
                 for i in keys:
                     try:
                         val = val.get(i)
-                    except KeyError:
+                    except TypeError:
                         return "Unknown"
 
             return val or "Unknown"
