@@ -1,5 +1,6 @@
-import re
 import sys
+import os
+import inspect
 
 from discord import Embed, Message, TextChannel
 from discord.ext import commands, flags
@@ -117,6 +118,35 @@ class Utils(commands.Cog):
         description = "```" + str(em.to_dict()) + "```"
         embed = Embed(description=description)
         await ctx.reply(embed=embed)
+
+    @commands.command()
+    async def source(self, ctx: commands.Context, *, command=None):
+        """Get the source code of the bot or the provided command."""
+        if command is None:
+            return await ctx.send("https://github.com/TechStruck/TechStruck-Bot")
+
+        if command == "help":
+            src = type(self.bot.help_command)
+            module = src.__module__
+            filename = inspect.getsourcefile(src)
+        else:
+            cmd = self.bot.get_command(command)
+            if cmd is None:
+                return await ctx.send("No such command found.")
+            src = cmd.callback.__code__
+            module = cmd.callback.__module__
+            filename = src.co_filename
+
+        lines, firstline = inspect.getsourcelines(src)
+        lines = len(lines)
+        location = (
+            module.replace(".", "/") + ".py"
+            if module.startswith("discord")
+            else os.path.relpath(filename).replace(r"\\", "/")
+        )
+
+        url = f"https://github.com/TechStruck/TechStruck-Bot/blob/main/{location}#L{firstline}-L{firstline+lines-1}"
+        await ctx.send(url)
 
 
 def setup(bot: TechStruckBot):
