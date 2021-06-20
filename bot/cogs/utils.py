@@ -132,7 +132,10 @@ class Utils(commands.Cog):
         else:
             cmd = self.bot.get_command(command)
             if cmd is None:
-                return await ctx.send("No such command found.")
+                return await ctx.send(embed=Embed(
+                            description="No such command found.",
+                            color=0x8ADCED
+                        )
             src = cmd.callback.__code__
             module = cmd.callback.__module__
             filename = src.co_filename
@@ -146,7 +149,10 @@ class Utils(commands.Cog):
         )
 
         url = f"https://github.com/TechStruck/TechStruck-Bot/blob/main/{location}#L{firstline}-L{firstline+lines-1}"
-        await ctx.send(url)
+        await ctx.send(embed=Embed(
+            description=f"Source of {command} can be found [here]({url}).",
+            color=0x8ADCED
+        )
 
 
 def setup(bot: TechStruckBot):
