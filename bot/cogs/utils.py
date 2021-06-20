@@ -153,11 +153,11 @@ class Utils(commands.Cog):
 
         url = f"https://github.com/TechStruck/TechStruck-Bot/blob/main/{location}#L{firstline}-L{firstline+lines-1}"
         await ctx.send(
-                embed=Embed(
+            embed=Embed(
                 description=f"Source of {command} can be found [here]({url}).",
                 color=0x8ADCED
-                )
             )
+        )
 
 
 def setup(bot: TechStruckBot):
