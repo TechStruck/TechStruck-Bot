@@ -134,10 +134,10 @@ class Utils(commands.Cog):
             if cmd is None:
                 return await ctx.send(
                     embed=Embed(
-                            description="No such command found.",
-                            color=0x8ADCED
-                        )
+                        description="No such command found.",
+                        color=0x8ADCED
                     )
+                )
             
             src = cmd.callback.__code__
             module = cmd.callback.__module__
