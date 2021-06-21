@@ -123,7 +123,12 @@ class Utils(commands.Cog):
     async def source(self, ctx: commands.Context, *, command=None):
         """Get the source code of the bot or the provided command."""
         if command is None:
-            return await ctx.send("https://github.com/TechStruck/TechStruck-Bot")
+            return await ctx.send(
+                embed=Embed(
+                    description=f"My source can be found [here](https://github.com/TechStruck/TechStruck-Bot)!",
+                    color=0x8ADCED
+            )
+        )
 
         if command == "help":
             src = type(self.bot.help_command)
