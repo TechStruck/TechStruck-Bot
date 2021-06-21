@@ -29,8 +29,9 @@ class PyPi(Cog):
         except ContentTypeError:
             return await ctx.send(
                 embed=Embed(
-                    description="No such package found in the search query.",
-                    color=Color.blurple(),
+                    title="No package/module found",
+                    description="Sorry but i could not find a package with that name...",
+                    color=0xE74C3C,  # this color is red.
                 )
             )
 
