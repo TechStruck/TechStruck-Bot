@@ -56,7 +56,11 @@ class Thank(commands.Cog):
             description=description,
             guild_id=ctx.guild.id,
         )
-        await ctx.send(f"You have thanked {recv}")
+        await ctx.send(
+            embed=Embed(
+                description=f"You thanked {recv.mention}!", color=0x6EFFFF
+            )
+        )
 
     @thank.command(name="stats", aliases=["check"])
     async def thank_stats(
