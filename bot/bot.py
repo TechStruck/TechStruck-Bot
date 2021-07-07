@@ -62,6 +62,7 @@ class TechStruckBot(commands.Bot):
                     "bot.cogs.utils",
                     "bot.cogs.brainfeed",
                     "bot.cogs.packages",
+                    "bot.cogs.coc",
                 )
             )
         if loadjsk:
