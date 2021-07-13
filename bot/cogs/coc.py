@@ -7,6 +7,8 @@ import re
 
 import time
 
+from ..bot import TechStruckBot
+
 coc_role = 862200819376717865  # Coc role in TCA
 coc_channel = 862195507229360168  # Coc channel in TCA
 coc_message = 862200700410527744
@@ -163,8 +165,8 @@ class ClashOfCode(commands.Cog):
         """Join the current active coc session"""
         if self.session_message_id == 0:
             return await ctx.send(
-                f"There is no active coc session right now"
-                f"use `{ctx.prefix}coc session start` to start a coc session"
+                f"There is no active coc session at the moment.\n"
+                f"Use `{ctx.prefix}coc session start` to start a coc session."
             )
         if ctx.author.id in self.session_users:
             return await ctx.send(
@@ -189,14 +191,14 @@ class ClashOfCode(commands.Cog):
                 f"If you want to join react to session message or use `{ctx.prefix}coc session join`"
             )
         self.session_users.remove(ctx.author.id)
-        return await ctx.send("You have left the session. No more pings for now")
+        return await ctx.send("You have left the session. No more pings for now.")
 
     @session.command(name="end", aliases=["e"])
     @commands.check(lambda ctx: ctx.channel.id == coc_channel)
     async def session_end(self, ctx: commands.context):
         """ Ends the current coc session """
         if self.session_message_id == 0:
-            return await ctx.send("There is no active clash of code session")
+            return await ctx.send("There is no active clash of code session.")
 
         try:
             msg = await ctx.channel.fetch_message(self.session_message_id)
@@ -213,7 +215,7 @@ class ClashOfCode(commands.Cog):
         self.session = False
 
         return await ctx.send(
-            f"Clash session has been closed by {ctx.author.mention}. See you later"
+            f"Clash session has been closed by {ctx.author.mention}. See you later :wave:"
         )
 
     @clash_of_code.command(name="invite", aliases=["i"])
@@ -337,5 +339,5 @@ class ClashOfCode(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: TechStruckBot):
     bot.add_cog(ClashOfCode(bot=bot))
