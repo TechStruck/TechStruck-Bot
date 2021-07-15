@@ -1,11 +1,11 @@
-from discord.ext import commands
-import discord
-
-import aiohttp
 import asyncio
 import re
-
 import time
+
+import aiohttp
+
+import discord
+from discord.ext import commands
 
 from ..bot import TechStruckBot
 
@@ -95,7 +95,7 @@ class ClashOfCode(commands.Cog):
     @clash_of_code.group(aliases=["s"])
     @commands.check(lambda ctx: ctx.channel.id == coc_channel)
     async def session(self, ctx: commands.Context):
-        """ Start or End a clash of code session """
+        """Start or End a clash of code session"""
         if ctx.invoked_subcommand is None:
             if self.session_message_id == 0:
                 return await ctx.send_help(self.bot.get_command("coc session start"))
@@ -104,7 +104,7 @@ class ClashOfCode(commands.Cog):
     @session.command(name="start", aliases=["s"])
     @commands.check(lambda ctx: ctx.channel.id == coc_channel)
     async def session_start(self, ctx: commands.context):
-        """ Start a new coc session """
+        """Start a new coc session"""
         if self.session_message_id != 0:
             return await ctx.send(
                 f"There is an active session right now.\n"
@@ -196,7 +196,7 @@ class ClashOfCode(commands.Cog):
     @session.command(name="end", aliases=["e"])
     @commands.check(lambda ctx: ctx.channel.id == coc_channel)
     async def session_end(self, ctx: commands.context):
-        """ Ends the current coc session """
+        """Ends the current coc session"""
         if self.session_message_id == 0:
             return await ctx.send("There is no active clash of code session.")
 
