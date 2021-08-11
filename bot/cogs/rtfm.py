@@ -88,7 +88,7 @@ class RTFM(commands.Cog):
         ).parse_object_inv(url)
 
     @commands.group(invoke_without_command=True)
-    async def rtfm(self, ctx: commands.Context, doc: str, *, term: str):
+    async def rtfm(self, ctx: commands.Context, doc: str, *, term: str = None):
         """
         Search through docs of a module/python
         Args: target, term
@@ -101,6 +101,8 @@ class RTFM(commands.Cog):
 
         if not target:
             return await ctx.reply("Alias/target not found")
+        if not term:
+            return await ctx.reply(self.targets[target])
 
         cache = self.cache.get(target)
         if not cache:
