@@ -244,8 +244,7 @@ class Github(commands.Cog):
                 i, b""
             )  # removes everything that needs to be excluded (eg. the uncentered A+)
         drawing = svg2rlg(BytesIO(res))
-        file = BytesIO(renderPM.drawToString(drawing, fmt=fmt))
-        return file
+        return BytesIO(renderPM.drawToString(drawing, fmt=fmt))
 
     def process_theme(self, theme):
         theme = theme.lower()
@@ -258,7 +257,7 @@ class Github(commands.Cog):
         description = result["description"]
         if not description:
             return ""
-        return description if len(description) < 100 else (description[:100] + "...")
+        return description if len(description) < 100 else f'{description[:100]}...'
 
     async def github_request(
         self,

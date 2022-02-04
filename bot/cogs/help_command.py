@@ -24,8 +24,7 @@ class HelpCommand(commands.HelpCommand):
 
     async def send_bot_help(self, mapping):
         embed = discord.Embed(title="Bot Commands", colour=self.COLOUR)
-        description = self.context.bot.description
-        if description:
+        if description := self.context.bot.description:
             embed.description = description
 
         for cog, cmds in mapping.items():

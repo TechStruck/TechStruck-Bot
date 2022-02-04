@@ -59,7 +59,7 @@ def send_memes(webhook: Webhook, subreddits: Iterable[str], quantity: int):
                 tp.submit(send_meme, webhook, subreddits)
                 for _ in range(quantity - sent)
             ]
-            new_sent = sum([r.result() for r in results])
+            new_sent = sum(r.result() for r in results)
             skipped += (quantity - sent) - new_sent
             sent += new_sent
     return sent, skipped

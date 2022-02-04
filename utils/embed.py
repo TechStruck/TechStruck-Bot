@@ -38,11 +38,7 @@ def bot_type_converter(data, add_timestamp=False):
     embed_data = data.get("embed")
     file_names = data.get("files", [])
 
-    embed = None
-
-    if embed_data:
-        embed = build_embed(embed_data)
-
+    embed = build_embed(embed_data) if embed_data else None
     return text, embed, [File(fn) for fn in file_names]
 
 
