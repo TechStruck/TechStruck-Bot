@@ -67,11 +67,12 @@ def process_message_mentions(message: str) -> str:
         return ""
     for _type, _id in re.findall(r"(role|user):(\d{18})", message):
         message = message.replace(
-            _type + ":" + _id, f"<@!{_id}>" if _type == "user" else f"<@&{_id}>"
+            f'{_type}:{_id}', f"<@!{_id}>" if _type == "user" else f"<@&{_id}>"
         )
+
     for label in ("mention", "ping"):
         for role in ("everyone", "here"):
-            message = message.replace(label + ":" + role, f"@{role}")
+            message = message.replace(f'{label}:{role}', f"@{role}")
     return message
 
 
@@ -172,7 +173,7 @@ def dict_to_embed(data: Dict[str, str], author: Union[User, Member] = None):
             setattr(embed, field, value)
     for field in "thumbnail", "image":
         if value := data.pop(field, None):
-            getattr(embed, "set_" + field)(url=value)
+            getattr(embed, f'set_{field}')(url=value)
 
     if data.pop("auto_author", False) and author:
         embed.set_author(name=author.display_name, icon_url=str(author.avatar_url))

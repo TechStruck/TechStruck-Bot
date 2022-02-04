@@ -125,10 +125,11 @@ class Utils(commands.Cog):
         if command is None:
             return await ctx.send(
                 embed=Embed(
-                    description=f"My source can be found [here](https://github.com/TechStruck/TechStruck-Bot)!",
-                    color=0x8ADCED
+                    description='My source can be found [here](https://github.com/TechStruck/TechStruck-Bot)!',
+                    color=0x8ADCED,
+                )
             )
-        )
+
 
         if command == "help":
             src = type(self.bot.help_command)
@@ -143,7 +144,7 @@ class Utils(commands.Cog):
                         color=0x8ADCED
                     )
                 )
-            
+
             src = cmd.callback.__code__
             module = cmd.callback.__module__
             filename = src.co_filename

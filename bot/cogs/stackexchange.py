@@ -106,7 +106,7 @@ class Stackexchange(commands.Cog):
         if not data["items"]:
             return await ctx.send("You don't have an account in this site!")
         profile = data["items"][0]
-        embed = Embed(title=site["name"] + " Profile", color=0x0077CC)
+        embed = Embed(title=f'{site["name"]} Profile', color=0x0077CC)
 
         embed.add_field(name="Username", value=profile["display_name"], inline=False)
         embed.add_field(name="Reputation", value=profile["reputation"], inline=False)
@@ -152,7 +152,7 @@ class Stackexchange(commands.Cog):
         embed.set_thumbnail(url=site["icon_url"])
         if data["items"]:
             for i, q in enumerate(data["items"], 1):
-                tags = "\u2800".join(["`" + t + "`" for t in q["tags"]])
+                tags = "\u2800".join([f'`{t}`' for t in q["tags"]])
                 embed.add_field(
                     name=str(i) + " " + html.unescape(q["title"]),
                     value=search_result_template.format(site=site, q=q, tags=tags),

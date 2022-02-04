@@ -36,7 +36,7 @@ def partial_ratio(a, b):
         o = SequenceMatcher(None, short, long[start:end])
         r = o.ratio()
 
-        if 100 * r > 99:
+        if r > 99 / 100:
             return 100
         scores.append(r)
 
@@ -157,9 +157,7 @@ def finder(text, collection, *, key=None, lazy=True):
             suggestions.append((len(r.group()), r.start(), item))
 
     def sort_key(tup):
-        if key:
-            return tup[0], tup[1], key(tup[2])
-        return tup
+        return (tup[0], tup[1], key(tup[2])) if key else tup
 
     if lazy:
         return (z for _, _, z in sorted(suggestions, key=sort_key))

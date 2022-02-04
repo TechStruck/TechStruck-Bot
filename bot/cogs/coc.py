@@ -44,11 +44,13 @@ class ClashOfCode(commands.Cog):
         if payload.user_id == self.bot.user.id:
             return
 
-        if self.session_message_id != 0:
-            if payload.message_id == self.session_message_id:
-                if payload.emoji.id == 859056281788743690:
-                    if payload.user_id not in self.session_users:
-                        self.session_users.append(payload.user_id)
+        if (
+            self.session_message_id != 0
+            and payload.message_id == self.session_message_id
+            and payload.emoji.id == 859056281788743690
+            and payload.user_id not in self.session_users
+        ):
+            self.session_users.append(payload.user_id)
         if payload.message_id != coc_message:
             return
 
@@ -66,11 +68,13 @@ class ClashOfCode(commands.Cog):
         if payload.user_id == self.bot.user.id:
             return
 
-        if self.session_message_id != 0:
-            if payload.message_id == self.session_message_id:
-                if payload.emoji.id == 859056281788743690:
-                    if payload.user_id in self.session_users:
-                        self.session_users.remove(payload.user_id)
+        if (
+            self.session_message_id != 0
+            and payload.message_id == self.session_message_id
+            and payload.emoji.id == 859056281788743690
+            and payload.user_id in self.session_users
+        ):
+            self.session_users.remove(payload.user_id)
 
         if payload.message_id != coc_message:
             return
@@ -118,9 +122,8 @@ class ClashOfCode(commands.Cog):
         )
 
         for member in self.role.members:
-            if member != ctx.author:
-                if member.status != discord.Status.offline:
-                    pager.add_line(member.mention + ", ")
+            if member != ctx.author and member.status != discord.Status.offline:
+                pager.add_line(f'{member.mention}, ')
 
         if not len(pager.pages):
             return await ctx.send(
@@ -278,7 +281,7 @@ class ClashOfCode(commands.Cog):
         for member_id in self.session_users:
             if member_id != ctx.author.id:
                 member = self.bot.get_user(member_id)
-                pager.add_line(member.mention + ", ")
+                pager.add_line(f'{member.mention}, ')
 
         if not len(pager.pages):
             return await ctx.send(

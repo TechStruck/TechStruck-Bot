@@ -10,11 +10,13 @@ from config.common import config
 async def backup():
     conn = await asyncpg.connect(str(config.database_uri))
     tables = ("users", "thanks", "guilds", "jokes")
-    data = {
-        field: [dict(rec) for rec in await conn.fetch("SELECT * FROM {}".format(field))]
+    return {
+        field: [
+            dict(rec)
+            for rec in await conn.fetch("SELECT * FROM {}".format(field))
+        ]
         for field in tables
     }
-    return data
 
 
 def main():
