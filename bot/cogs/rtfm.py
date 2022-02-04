@@ -74,8 +74,9 @@ class RTFM(commands.Cog):
     async def build(self, target) -> None:
         url = self.targets[target]
         req = await self.session.get(
-            self.url_overrides.get(target, url + "/objects.inv")
+            self.url_overrides.get(target, f'{url}/objects.inv')
         )
+
         if req.status != 200:
             warnings.warn(
                 Warning(

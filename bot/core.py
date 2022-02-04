@@ -77,9 +77,13 @@ class Common(commands.Cog):
     async def prefix(self, ctx: commands.Context):
         """View current prefix of bot"""
         await ctx.send(
-            f"My prefix here is `"
-            + (self.bot.prefix_cache[ctx.guild.id] if ctx.guild else ".")
-            + "`"
+            (
+                (
+                    'My prefix here is `'
+                    + (self.bot.prefix_cache[ctx.guild.id] if ctx.guild else ".")
+                )
+                + "`"
+            )
         )
 
     @commands.command()
